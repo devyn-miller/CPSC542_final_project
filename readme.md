@@ -1,1 +1,2 @@
-CPSC 542 Final Project
+## CPSC 542 Final Project
+
