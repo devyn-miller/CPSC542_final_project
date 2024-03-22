@@ -1,0 +1,2 @@
+class ConvAutoencoder:
+    pass
