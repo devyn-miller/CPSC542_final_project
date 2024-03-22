@@ -13,6 +13,7 @@ video_colorization_project/
 ├── data/                               # Data used for training
 ├── docs/                               # Documentation files
 ├── readme.md
+├── requirements.txt
 └── src/
     ├── augmentation.py
     ├── __init__.py
@@ -26,7 +27,6 @@ video_colorization_project/
     │   └── result.py
     ├── prediction.py
     ├── preprocessing.py
-    ├── requirements.txt
     ├── training.py
     └── validation.py
 
