@@ -8,8 +8,7 @@ runme:
 
 This repository contains code and documentation for our Video Colorization Project.
 
-```py {"id":"01HSVVGQ6R93E1HD56WMDN5Y7C"}
-Proposed timeline:
+### Proposed timeline:
 
 April 12 (3 weeks from today): individual pipelines developed; models trained
 
@@ -24,14 +23,11 @@ May 3-presentation date: practice presenting, refine as necessary
 I was thinking we could set up meetings for each of these checkpoints with further communication as needed. This is just a suggestion so if anyone else has other preferences that’s totally cool as well!
 
 
-- devyn :,)
-
-```
+-devyn :,)
 
 ## Workspace Setup
 
-```
-CPSC542_FINAL_PROJECT
+```CPSC542_FINAL_PROJECT
 ├── clips
 ├── data
 │   └── .txt
@@ -59,7 +55,7 @@ CPSC542_FINAL_PROJECT
 ├── main.ipynb
 ├── readme.md
 └── requirements.txt
-
+```
 Here's a brief explanation of each file and its role in the project:
 
 - **`readme.md`**
