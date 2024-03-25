@@ -65,7 +65,7 @@ Here's a brief explanation of each file and its role in the project:
   - Outlines guidelines for contributing to the project, such as branch usage, commit message expectations, and pull request requirements.
 
 - **`main.ipynb`**
-  - A Jupyter notebook that serves as the main workspace for the project. It includes sections for preprocessing and augmentation, training, prediction, and validation, with placeholders for code.
+  - A Jupyter notebook that serves as the main workspace for the project. It includes sections for preprocessing and augmentation, training, prediction, and validation.
 
 - **`src/training.py`**
   - Contains functions for model training and evaluation. It includes a tuner for hyperparameter optimization (`run_tuner`) and a method for training the best model (`get_best_model`). Additionally, it provides a function to evaluate model performance and plot training history.
