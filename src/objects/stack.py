@@ -22,7 +22,7 @@ class Stack:
     def create_model(self, hp, model_type='ConvAutoencoder'):
         '''Creates a ML model using the given model type and updates self.model
         '''
-        if model_type is 'ConvAutoencoder':
+        if model_type == 'ConvAutoencoder':
             '''Create the ConvAutoencoder architecture.'''
 
         return self.model
