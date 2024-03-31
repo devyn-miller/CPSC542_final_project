@@ -1,12 +1,26 @@
 from augmentation import ImageAugmenter
-from objects.stack import Stack
+from stack import Stack
+import cv2
+import os
 
 def process_video(video_file_location, image_location='../data'):
     '''Takes in a video file location, converts the video to a 
-        bunch of images and then places them into a folder. 
-        (if unspecified then it places it in the data folder)
-        '''
-    return
+    bunch of images and then places them into a folder. 
+    (if unspecified then it places it in the data folder)
+    '''
+    vidcap = cv2.VideoCapture(video_file_location)
+    success, image = vidcap.read()
+    count = 0
+    while success:
+        cv2.imwrite(os.path.join(image_location, f"frame{count}.jpg"), image)     # save frame as JPEG file      
+        success, image = vidcap.read()
+        count += 1
+
+def process_all_videos(directory, image_location='../data'):
+    for filename in os.listdir(directory):
+        if filename.endswith(".mp4"):
+            video_file_location = os.path.join(directory, filename)
+            process_video(video_file_location, image_location)
 
 def color_to_bw(colored_image):
     '''Turns a colored image into a black and white image.  Called 
@@ -46,6 +60,7 @@ def preprocess(BATCH_SIZE = 8):
     the finished datasets.
     '''
     stack = Stack()
+    process_all_videos('/Users/devynmiller/Downloads/movies-cpsc542', '../data')
     stack = train_test_validation_split(stack)
     stack = augment_datasets(stack)
     stack = batch_datasets(stack, BATCH_SIZE)

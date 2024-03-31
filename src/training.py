@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 
 def run_tuner(stack, c):
-    '''This is a turner.  It allows you to train up multiple models so 
+    '''This is a tuner.  It allows you to train up multiple models so 
     that you can figure out an architecture that works for you.
     '''
     tuner = kt.RandomSearch(
