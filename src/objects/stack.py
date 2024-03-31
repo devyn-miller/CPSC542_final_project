@@ -1,4 +1,5 @@
 from data import Data
+from src.objects.architecture.conv_autoencoder import ConvAutoencoder
 
 class Stack:
     '''This class holds the data, model, architecture, and results
@@ -23,8 +24,7 @@ class Stack:
         '''Creates a ML model using the given model type and updates self.model
         '''
         if model_type == 'ConvAutoencoder':
-            '''Create the ConvAutoencoder architecture.'''
-
+            self.model = ConvAutoencoder().create(hp)
         return self.model
     
     def finished_model(self, final_model, final_history):
