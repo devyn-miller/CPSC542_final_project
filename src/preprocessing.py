@@ -1,8 +1,10 @@
-from augmentation import ImageAugmenter
-from stack import Stack
+try:
+    from objects.augmentation import ImageAugmenter
+    from objects.stack import Stack
+except ImportError as e:
+    print(e, "\nMake sure 'objects' module is installed and accessible")
 import cv2
 import os
-
 def process_video(video_file_location, image_location='../data', frame_count=None, duration=None, resolution=(1280, 720)):
     '''Takes in a video file location, converts the video to a 
     bunch of images and then places them into a folder. 

@@ -1,5 +1,5 @@
 import tkinter as tk
-from preprocessing import process_all_videos
+from src.preprocessing import process_all_videos
 
 def on_enter():
     frame_count = frame_count_var.get()
@@ -10,8 +10,14 @@ def on_enter():
     duration = int(duration) if duration else None
     resolution = tuple(map(int, resolution.split('x'))) if resolution else (1280, 720)
     
-    # Call your processing function here
-    process_all_videos('/path/to/videos', '../data', frame_count, duration, resolution)
+    # Adjust the call to match the expected signature of process_all_videos
+    process_all_videos({
+        'video_dir': '../videos',
+        'data_dir': '../data',
+        'frame_count': frame_count,
+        'duration': duration,
+        'resolution': resolution
+    })
     root.destroy()
 
 root = tk.Tk()

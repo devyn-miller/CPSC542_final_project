@@ -1,4 +1,4 @@
-from data import Data
+from src.objects.data import Data
 from src.objects.architecture.conv_autoencoder import ConvAutoencoder
 
 class Stack:
