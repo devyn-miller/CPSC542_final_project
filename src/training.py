@@ -51,7 +51,7 @@ def get_best_model(stack):
         "m": 1
     }
     
-    tuner = run_tuner(stack.dataset_train, stack.dataset_val, c)
+    tuner = run_tuner(stack, c)
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
     best_model = stack.create_model(best_hps)
     

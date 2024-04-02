@@ -3,7 +3,7 @@ from stack import Stack
 import cv2
 import os
 
-def process_video(video_file_location, image_location='../data'):
+def process_video(video_file_location, image_location='../data', frame_count=None, duration=None, resolution=(1280, 720)):
     '''Takes in a video file location, converts the video to a 
     bunch of images and then places them into a folder. 
     (if unspecified then it places it in the data folder)
@@ -12,15 +12,26 @@ def process_video(video_file_location, image_location='../data'):
     success, image = vidcap.read()
     count = 0
     while success:
-        cv2.imwrite(os.path.join(image_location, f"frame{count}.jpg"), image)     # save frame as JPEG file      
+        if frame_count and count >= frame_count:
+            break
+        image_resized = cv2.resize(image, resolution)
+        cv2.imwrite(os.path.join(image_location, f"frame{count}.jpg"), image_resized)     # save frame as JPEG file      
         success, image = vidcap.read()
         count += 1
 
 def process_all_videos(directory, image_location='../data'):
+    frame_count = input("Enter the number of frames you want to extract (leave blank for all): ")
+    duration = input("Enter the duration of the video to process in seconds (leave blank for full video): ")
+    resolution_input = input("Enter the desired resolution as width x height (leave blank for 720p): ")
+
+    frame_count = int(frame_count) if frame_count else None
+    duration = int(duration) if duration else None
+    resolution = tuple(map(int, resolution_input.split('x'))) if resolution_input else (1280, 720)
+
     for filename in os.listdir(directory):
         if filename.endswith(".mp4"):
             video_file_location = os.path.join(directory, filename)
-            process_video(video_file_location, image_location)
+            process_video(video_file_location, image_location, frame_count=frame_count, duration=duration, resolution=resolution)
 
 def color_to_bw(colored_image):
     '''Turns a colored image into a black and white image.'''
