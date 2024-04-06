@@ -100,11 +100,22 @@ def train_test_validation_split(stack, image_location='../data', ):
     return stack
 
 def augment_datasets(stack):
-    '''This updates the datasets with augmented images, up to 
+    '''
+    This updates the datasets with augmented images, up to 
     yall what type of augmentation you want to use just make 
     sure you use the ImageAugmenter class.
+
+    :param stack: The stack to be augmented
+    :type stack: Stack
+    :return: The augmented stack 
+    :rtype: Stack
     '''
     augmenter = ImageAugmenter(IMG_WIDTH=1080, IMG_HEIGHT=720)
+    
+    train_dataset = augmenter.augment(stack.train_dataset)
+    test_dataset = augmenter.augment(stack.test_dataset)
+    val_dataset = augmenter.augment(stack.val_dataset)
+    
     stack.update_datasets(train_dataset, test_dataset, val_dataset)
     return stack
     
@@ -114,21 +125,29 @@ def batch_datasets(stack, BATCH_SIZE):
     Batches the train, test and validation sets based on 
     the BATCH_SIZE. BATCH_SIZE is going to depend on your computer.
     '''
+    
+    train_dataset = stack.train_dataset.batch(BATCH_SIZE)
+    test_dataset = stack.test_dataset.batch(BATCH_SIZE)
+    val_dataset = stack.val_dataset.batch(BATCH_SIZE)
+    
     stack.update_datasets(train_dataset, test_dataset, val_dataset)
     return stack
 
-def preprocess(BATCH_SIZE = 8):
+def preprocess(video_file_directory, BATCH_SIZE = 8):
     '''
     This is the method called by main.ipynb. 
     It also calls all the other functions and 
     returns the stack which will hold the finished datasets.
 
+    :param video_file_directory: path to the video file directory
+    :type video_file_directory: str
     :param BATCH_SIZE: the batch size, defaults to 8
     :type BATCH_SIZE: int, optional
     :return: the stack with updated datasets
     :rtype: Stack
     '''
     stack = Stack()
+    process_videos(video_file_directory)
     stack = train_test_validation_split(stack)
     stack = augment_datasets(stack)
     stack = batch_datasets(stack, BATCH_SIZE)
