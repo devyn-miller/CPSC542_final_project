@@ -7,9 +7,16 @@ import os
 # https://www.geeksforgeeks.org/python-process-images-of-a-video-using-opencv/ 
 def process_video(video_file_location, image_location='../data', resolution=(1280, 720)):
     '''
-    Takes in a video file location, converts the video to a 
-    bunch of images and then places them into a folder. 
+    Takes in a video file location, converts the video to 
+    frames and then places them into a folder. 
     (if unspecified then it places it in the data folder)
+
+    :param video_file_location: path to the video file
+    :type video_file_location: str
+    :param image_location: location of the saved images, defaults to '../data'
+    :type image_location: str, optional
+    :param resolution: resolution of the video, defaults to (1280, 720)
+    :type resolution: tuple, optional
     '''
     # Step 1: Create VideoCapture object to read video 
     cap = cv2.VideoCapture(video_file_location)
@@ -47,6 +54,27 @@ def process_video(video_file_location, image_location='../data', resolution=(128
     
     return
 
+def process_videos(video_file_directory, image_location='../data', resolution=(1280, 720)):
+    '''
+    Takes in all video file locations in a directory, 
+    converts the video to frames and then places them into a folder. 
+    (if unspecified then it places it in the data folder)
+
+    :param video_file_directory: path to the video file directory
+    :type video_file_directory: str
+    :param image_location: location of the saved images, defaults to '../data'
+    :type image_location: str, optional
+    :param resolution: resolution of the video, defaults to (1280, 720)
+    :type resolution: tuple, optional
+    '''
+    
+    for file in video_file_directory:  
+        if file.endswith('.mp4'): 
+            video_file_location = os.path.join(video_file_directory, file)
+            process_video(video_file_location)
+    
+    return 
+    
 
 def train_test_validation_split(stack, image_location='../data', ):
     '''Creates train/test/validation generators and returns them.
