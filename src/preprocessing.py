@@ -77,12 +77,25 @@ def process_videos(video_file_directory, image_location='../data', resolution=(1
     
 
 def train_test_validation_split(stack, image_location='../data', ):
-    '''Creates train/test/validation generators and returns them.
+    '''
+    Creates train/test/validation generators and returns them.
+    
     Each dataset should be build as following:
     data['bw_image'] = 1080x720x1
     data['colored_image'] = 1080x720x3
-    We can change the sizes if they are too big.
+
+    :param stack: The stack to be updated 
+    :type stack: Stack
+    :param image_location: _description_, defaults to '../data'
+    :type image_location: str, optional
+    :return: Stack updated with the test/train/validation 
+    :rtype: Stack
     '''
+    
+    train_dataset = ''
+    test_dataset = ''
+    val_dataset = ''
+    
     stack.update_datasets(train_dataset, test_dataset, val_dataset)
     return stack
 
@@ -97,16 +110,23 @@ def augment_datasets(stack):
     
 
 def batch_datasets(stack, BATCH_SIZE):
-    '''Batches the train, test and validation sets based on 
-    the BATCH_SIZE.  BATCH_SIZE is going to depend on your computer.
+    '''
+    Batches the train, test and validation sets based on 
+    the BATCH_SIZE. BATCH_SIZE is going to depend on your computer.
     '''
     stack.update_datasets(train_dataset, test_dataset, val_dataset)
     return stack
 
 def preprocess(BATCH_SIZE = 8):
-    '''This is the method called by main.ipynb.  It also calls 
-    all the other functions and returns the stack which will hold 
-    the finished datasets.
+    '''
+    This is the method called by main.ipynb. 
+    It also calls all the other functions and 
+    returns the stack which will hold the finished datasets.
+
+    :param BATCH_SIZE: the batch size, defaults to 8
+    :type BATCH_SIZE: int, optional
+    :return: the stack with updated datasets
+    :rtype: Stack
     '''
     stack = Stack()
     stack = train_test_validation_split(stack)
