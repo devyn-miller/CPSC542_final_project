@@ -5,6 +5,7 @@ except ImportError as e:
     print(e, "\nMake sure 'objects' module is installed and accessible")
 import cv2
 import os
+
 def process_video(video_file_location, image_location='../data', frame_count=None, duration=None, resolution=(1280, 720)):
     '''Takes in a video file location, converts the video to a 
     bunch of images and then places them into a folder. 
@@ -53,10 +54,18 @@ def train_test_validation_split(stack, image_location='../data'):
 def augment_datasets(stack):
     '''Updates the datasets with augmented images.'''
     augmenter = ImageAugmenter(IMG_WIDTH=1080, IMG_HEIGHT=720)
-    # Example augmentation logic. Replace with actual augmentation logic
-    augmented_train_dataset = augmenter.augment(stack.train_dataset)
-    augmented_test_dataset = augmenter.augment(stack.test_dataset)
-    augmented_val_dataset = augmenter.augment(stack.val_dataset)
+    
+    # Define a function that will be applied to each element of the dataset
+    def augment_image(image):
+        # Assuming the dataset consists of image-label pairs
+        augmented_image = augmenter.augment(image[0])
+        return (augmented_image, image[1])
+    
+    # Apply the augment_image function to each element of the dataset using map
+    augmented_train_dataset = stack.train_dataset.map(augment_image)
+    augmented_test_dataset = stack.test_dataset.map(augment_image)
+    augmented_val_dataset = stack.val_dataset.map(augment_image)
+    
     stack.update_datasets(augmented_train_dataset, augmented_test_dataset, augmented_val_dataset)
     return stack
     
