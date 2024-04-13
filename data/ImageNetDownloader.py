@@ -1,7 +1,6 @@
 import os
 import requests
 from tqdm import tqdm
-from torchvision import datasets
 
 def download_file(url, local_filename):
     """
@@ -53,6 +52,6 @@ local_filenames = [
 for url, local_filename in zip(urls, local_filenames):
     download_file(url, local_filename)
 
-
+# from torchvision import datasets
 # train_dataset = datasets.ImageFolder('imagenet/train', transform=None)
 # val_dataset = datasets.ImageFolder('imagenet/val', transform=None)
