@@ -6,7 +6,7 @@ from skimage.io import imshow
 img=load_img('img/pic.jpg')
 cielab_img = rgb2lab(img)
 
-# decoding CALAB color dimensions
+# decoding CIELAB color dimensions
 L=cielab_img[:,:,0] 
 A=cielab_img[:,:,1]
 B=cielab_img[:,:,2]
@@ -21,9 +21,9 @@ imshow(B)  # blue to yellow (-127:+128)
 - A: green - red
 - B: blue - yellow
 
-![Cielab Color Chart](cielab_color_chart.jpeg)
+![Cielab Color Chart](img/cielab_color_chart.jpeg)
 
-![alt text](CIELHLC_3D.png)
+![alt text](img/CIELHLC_3D.png)
 
 <!-- Start by normalize A/B vectors (0:1) -->
 
