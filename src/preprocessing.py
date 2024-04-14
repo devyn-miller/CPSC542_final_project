@@ -5,6 +5,8 @@ except ImportError as e:
     print(e, "\nMake sure 'objects' module is installed and accessible")
 import cv2
 import os
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
 
 def process_video(video_file_location, image_location='../data', frame_count=None, duration=None, resolution=(1280, 720)):
     '''Takes in a video file location, converts the video to a 
@@ -42,12 +44,15 @@ def color_to_bw(colored_image):
     return bw_image
 
 def train_test_validation_split(stack, image_location='../data'):
-    '''Creates train/test/validation datasets.'''
-    # Example logic to split datasets
-    # This is a placeholder. You need to replace it with your actual data splitting logic
-    train_dataset = "your_train_dataset"
-    test_dataset = "your_test_dataset"
-    val_dataset = "your_val_dataset"
+    # Assuming a function to load your dataset exists within this file or is imported correctly
+    dataset = stack.load_dataset(image_location)  # Corrected to use a method from the stack object to load the dataset
+    
+    # Split dataset into training and temp (test + validation) datasets
+    train_dataset, temp_dataset = train_test_split(dataset, test_size=0.4, random_state=42)
+    # Split temp dataset into testing and validation datasets
+    test_dataset, val_dataset = train_test_split(temp_dataset, test_size=0.5, random_state=42)
+    
+    # Update stack with the new datasets
     stack.update_datasets(train_dataset, test_dataset, val_dataset)
     return stack
 
@@ -72,21 +77,26 @@ def augment_datasets(stack):
 
 def batch_datasets(stack, BATCH_SIZE):
     '''Batches the train, test, and validation sets.'''
-    # Example batching logic. Replace with actual batching logic
-    batched_train_dataset = stack.train_dataset.batch(BATCH_SIZE)
-    batched_test_dataset = stack.test_dataset.batch(BATCH_SIZE)
-    batched_val_dataset = stack.val_dataset.batch(BATCH_SIZE)
+
+    # Convert datasets to TensorFlow datasets and apply batching
+    batched_train_dataset = tf.data.Dataset.from_tensor_slices(stack.train_dataset).batch(BATCH_SIZE)
+    batched_test_dataset = tf.data.Dataset.from_tensor_slices(stack.test_dataset).batch(BATCH_SIZE)
+    batched_val_dataset = tf.data.Dataset.from_tensor_slices(stack.val_dataset).batch(BATCH_SIZE)
+    
     stack.update_datasets(batched_train_dataset, batched_test_dataset, batched_val_dataset)
     return stack
+
 def preprocess(BATCH_SIZE = 8):
     '''This is the method called by main.ipynb.  It also calls 
     all the other functions and returns the stack which will hold 
     the finished datasets.
     '''
     stack = Stack()
-    process_all_videos('/Users/devynmiller/Downloads/movies-cpsc542', '../data')
+    process_all_videos('/Users/devynmiller/CPSC542_final_project/data/movie_mp4s')
     stack = train_test_validation_split(stack)
     stack = augment_datasets(stack)
     stack = batch_datasets(stack, BATCH_SIZE)
     
     return stack
+
+
