@@ -7,12 +7,14 @@ import kerastuner as kt
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+from objects.stack import Stack
+
 
 
 
 
 def run_tuner(stack, c):
-    '''This is a tuner.  It allows you to train up multiple models so 
+    '''This is a turner.  It allows you to train up multiple models so 
     that you can figure out an architecture that works for you.
     '''
     tuner = kt.RandomSearch(
@@ -51,7 +53,7 @@ def get_best_model(stack):
         "m": 1
     }
     
-    tuner = run_tuner(stack, c)
+    tuner = run_tuner(stack.dataset_train, stack.dataset_val, c)
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
     best_model = stack.create_model(best_hps)
     

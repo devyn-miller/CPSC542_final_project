@@ -1,12 +1,13 @@
 try:
-    from objects.augmentation import ImageAugmenter
+    from augmentation import ImageAugmenter
     from objects.stack import Stack
 except ImportError as e:
     print(e, "\nMake sure 'objects' module is installed and accessible")
 import cv2
 import os
+from objects.stack import Stack
 
-def process_video(video_file_location, image_location='../data', frame_count=None, duration=None, resolution=(1280, 720)):
+def process_video(video_file_location, image_location='./data', frame_count=None, duration=None, resolution=(1280, 720)):
     '''Takes in a video file location, converts the video to a 
     bunch of images and then places them into a folder. 
     (if unspecified then it places it in the data folder)
@@ -22,7 +23,7 @@ def process_video(video_file_location, image_location='../data', frame_count=Non
         success, image = vidcap.read()
         count += 1
 
-def process_all_videos(directory, image_location='../data'):
+def process_all_videos(directory, image_location='./data'):
     frame_count = input("Enter the number of frames you want to extract (leave blank for all): ")
     duration = input("Enter the duration of the video to process in seconds (leave blank for full video): ")
     resolution_input = input("Enter the desired resolution as width x height (leave blank for 720p): ")
@@ -41,7 +42,7 @@ def color_to_bw(colored_image):
     bw_image = cv2.cvtColor(colored_image, cv2.COLOR_BGR2GRAY)
     return bw_image
 
-def train_test_validation_split(stack, image_location='../data'):
+def train_test_validation_split(stack, image_location='./data'):
     '''Creates train/test/validation datasets.'''
     # Example logic to split datasets
     # This is a placeholder. You need to replace it with your actual data splitting logic
@@ -84,7 +85,7 @@ def preprocess(BATCH_SIZE = 8):
     the finished datasets.
     '''
     stack = Stack()
-    process_all_videos('/Users/devynmiller/Downloads/movies-cpsc542', '../data')
+    process_all_videos('./data/movies', './data/images')
     stack = train_test_validation_split(stack)
     stack = augment_datasets(stack)
     stack = batch_datasets(stack, BATCH_SIZE)
