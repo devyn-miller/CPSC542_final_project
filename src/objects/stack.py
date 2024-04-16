@@ -13,12 +13,16 @@ class Stack:
         self.final_model = None
         self.final_history = None
         
-    def update_datasets(self, train_dataset, test_dataset, val_dataset):
+        self.train_generator = None
+        self.test_generator = None
+        self.val_generator = None
+        
+    def update_datasets(self, train_generator, test_generator, val_generator):
         '''Updates variables dataset_train, test_dataset, val_dataset in stack.
         '''
-        self.train_dataset = train_dataset
-        self.test_dataset = test_dataset
-        self.val_dataset = val_dataset
+        self.train_generator = train_generator
+        self.test_generator = test_generator
+        self.val_generator = val_generator
         
     def create_model(self, hp, model_type='conv_autoencoder'):
         if model_type is "conv_autoencoder":

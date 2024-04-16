@@ -9,6 +9,13 @@ import matplotlib.pyplot as plt
 
 from objects.stack import Stack
 
+HAYDENS_COMPUTER = True
+
+if HAYDENS_COMPUTER:
+    import os
+    os.environ['TF_XLA_FLAGS'] = '--tf_xla_auto_jit=0'
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
 
 
 
@@ -29,9 +36,11 @@ def run_tuner(stack, c):
     stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=c["patience"])
 
     tuner.search(
-        stack.dataset_train,
+        stack.train_generator,
+        steps_per_epoch=stack.train_generator.samples // stack.train_generator.batch_size,
         epochs=c["epochs"],  # Adjust epochs according to your need
-        validation_data=stack.dataset_val,
+        validation_data=stack.val_generator,
+        validation_steps=stack.val_generator.samples // stack.val_generator.batch_size,
         callbacks=[stop_early]
     )
 
@@ -53,16 +62,18 @@ def get_best_model(stack):
         "m": 1
     }
     
-    tuner = run_tuner(stack.dataset_train, stack.dataset_val, c)
+    tuner = run_tuner(stack, c)
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
     best_model = stack.create_model(best_hps)
     
     stop_early = EarlyStopping(monitor='val_loss', patience=c["patience"]*c["m"])
 
     history = best_model.fit(
-        stack.dataset_train,
+        stack.train_generator,
+        steps_per_epoch=stack.train_generator.samples // stack.train_generator.batch_size,
         epochs=c["epochs"]*c["m"],  # Train for more epochs
-        validation_data=stack.dataset_val,
+        validation_data=stack.val_generator,
+        validation_steps=stack.val_generator.samples // stack.val_generator.batch_size,
         callbacks=[stop_early]
     )
 
