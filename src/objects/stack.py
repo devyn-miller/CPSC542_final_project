@@ -1,11 +1,12 @@
-from src.objects.data import Data
-from src.objects.architecture.conv_autoencoder import ConvAutoencoder
+import importlib
+from architecture.conv_autoencoder import ConvAutoencoder
+
 
 class Stack:
     '''This class holds the data, model, architecture, and results
     '''
     def __init__(self):
-        self.data = Data()
+        #self.data = Data()
         
         self.architecture = None
         self.model = None
@@ -17,6 +18,9 @@ class Stack:
         self.test_generator = None
         self.val_generator = None
         
+        self.img_width = None
+        self.img_height = None
+        
     def update_datasets(self, train_generator, test_generator, val_generator):
         '''Updates variables dataset_train, test_dataset, val_dataset in stack.
         '''
@@ -27,7 +31,7 @@ class Stack:
     def create_model(self, hp, model_type='conv_autoencoder'):
         if model_type is "conv_autoencoder":
             self.architecture = ConvAutoencoder()
-            self.model = self.architecture(hp)
+            self.model = self.architecture.build_model(hp)
         
         return self.model
     
@@ -36,5 +40,8 @@ class Stack:
         self.final_model = final_model
         self.final_history = final_history
         
+    def update_dimensions(self, width, height):
+        self.img_width = width
+        self.img_height = height
 
         

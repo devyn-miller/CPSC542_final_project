@@ -11,7 +11,6 @@ class ImageAugmenter:
         '''Applies augmentation to the images.'''
         
         return ImageDataGenerator(
-            rescale=1./255,
             rotation_range=40,       # Random rotations from 0 to 40 degrees
             width_shift_range=0.2,   # Random horizontal shifts
             height_shift_range=0.2,  # Random vertical shifts

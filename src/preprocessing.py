@@ -23,7 +23,9 @@ def process_video(video_file_location, image_location='./data', frame_count=None
         if frame_count and count >= frame_count:
             break
         image_resized = cv2.resize(image, resolution)
-        cv2.imwrite(os.path.join(image_location, f"frame{count}.jpg"), image_resized)     # save frame as JPEG file      
+        frame_path = os.path.join(image_location, f"frame{count}.jpg")
+        cv2.imwrite(frame_path, image_resized)     # save frame as JPEG file      
+        
         success, image = vidcap.read()
         count += 1
 
@@ -90,12 +92,30 @@ def create_tts_directories(train_ratio=0.7, val_ratio=0.1, test_ratio=0.2):
     copy_files(train_filenames, './data/train')
     copy_files(val_filenames, './data/validation')
     copy_files(test_filenames, './data/test')
+    
+    def organize_images(base_dir):
+        # Create a subdirectory if it doesn't exist
+        sub_dir = os.path.join(base_dir, 'images')
+        os.makedirs(sub_dir, exist_ok=True)
+
+        # Move all image files into the new subdirectory
+        for file_name in os.listdir(base_dir):
+            old_path = os.path.join(base_dir, file_name)
+            if os.path.isfile(old_path) and file_name.endswith(('.jpg', '.jpeg', '.png')):
+                new_path = os.path.join(sub_dir, file_name)
+                shutil.move(old_path, new_path)
+
+    # Organize images in train and validation directories
+    organize_images('./data/train')
+    organize_images('./data/validation')
+    organize_images('./data/test')
+
+
      
 
-def train_test_validation_split(stack, BATCH_SIZE, image_location='./data'):
+def train_test_validation_split(stack, BATCH_SIZE, RESOLUTION, image_location='./data'):
     '''Creates train/test/validation datasets.'''
-    IMG_WIDTH=1080
-    IMG_HEIGHT=720
+    IMG_WIDTH, IMG_HEIGHT = RESOLUTION
     
     current_directory = os.getcwd()
     print("Current directory:", current_directory)
@@ -103,7 +123,7 @@ def train_test_validation_split(stack, BATCH_SIZE, image_location='./data'):
     create_tts_directories()
     
     
-    augmenter = ImageAugmenter(IMG_WIDTH=1080, IMG_HEIGHT=720)
+    augmenter = ImageAugmenter(IMG_WIDTH=IMG_WIDTH, IMG_HEIGHT=IMG_HEIGHT)
     
     # Create augmented train data generator
     train_data_gen = augmenter.augment()
@@ -112,8 +132,28 @@ def train_test_validation_split(stack, BATCH_SIZE, image_location='./data'):
     test_data_gen = ImageDataGenerator(rescale=1./255)
     val_data_gen = ImageDataGenerator(rescale=1./255)
     
-    current_directory = os.getcwd()
-    print("Current directory3:", current_directory)
+    
+    def testing_generator(directory):
+        print("Testing generator for directory:", directory)
+        data_gen = ImageDataGenerator(rescale=1./255)
+        generator = data_gen.flow_from_directory(
+            directory,
+            target_size=(480, 360),  # Change as per your requirement
+            batch_size=32,
+            class_mode=None  # No labels for autoencoder
+        )
+
+        print("Found", generator.samples, "images in", generator.directory)
+        if generator.samples > 0:
+            batch = next(generator)
+            print("Batch shape:", batch.shape)
+        else:
+            print("No data to generate from.")
+
+    # Example usage
+    #testing_generator('./data/train')
+    #testing_generator('./data/validation')
+    
     
     train_generator = train_data_gen.flow_from_directory(
         './data/train',
@@ -133,43 +173,23 @@ def train_test_validation_split(stack, BATCH_SIZE, image_location='./data'):
         batch_size=BATCH_SIZE,
         class_mode=None)
     
+    #batch = next(train_generator)
+    #print("Type of output from generator:", type(batch))
+    #images = next(train_generator)
+    #print("Shape of images:", images.shape)
+
+
+    stack.update_dimensions(IMG_WIDTH, IMG_HEIGHT)
     stack.update_datasets(train_generator, test_generator, val_generator)
     return stack
 
-def augment_datasets(stack):
-    '''Updates the datasets with augmented images.'''
-    
-    
-    # Define a function that will be applied to each element of the dataset
-    def augment_image(image):
-        # Assuming the dataset consists of image-label pairs
-        augmented_image = augmenter.augment(image[0])
-        return (augmented_image, image[1])
-    
-    # Apply the augment_image function to each element of the dataset using map
-    augmented_train_dataset = stack.train_dataset.map(augment_image)
-    augmented_test_dataset = stack.test_dataset.map(augment_image)
-    augmented_val_dataset = stack.val_dataset.map(augment_image)
-    
-    stack.update_datasets(augmented_train_dataset, augmented_test_dataset, augmented_val_dataset)
-    return stack
-    
-
-def batch_datasets(stack, BATCH_SIZE):
-    '''Batches the train, test, and validation sets.'''
-    # Example batching logic. Replace with actual batching logic
-    batched_train_dataset = stack.train_dataset.batch(BATCH_SIZE)
-    batched_test_dataset = stack.test_dataset.batch(BATCH_SIZE)
-    batched_val_dataset = stack.val_dataset.batch(BATCH_SIZE)
-    stack.update_datasets(batched_train_dataset, batched_test_dataset, batched_val_dataset)
-    return stack
-def preprocess(BATCH_SIZE = 8):
+def preprocess(BATCH_SIZE = 8, RESOLUTION = (480, 360)):
     '''This is the method called by main.ipynb.  It also calls 
     all the other functions and returns the stack which will hold 
     the finished datasets.
     '''
     stack = Stack()
     process_all_videos('./data/movies', './data/images')
-    stack = train_test_validation_split(stack, BATCH_SIZE)
+    stack = train_test_validation_split(stack, BATCH_SIZE, RESOLUTION)
     
     return stack
