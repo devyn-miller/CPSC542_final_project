@@ -1,0 +1,83 @@
+project:
+  name: Video Colorization Project
+  description: A project focused on video colorization using deep learning.
+
+contributors:
+  - Hayden Fargo
+  - Tyler Lewis
+  - Devyn Miller
+  - Ponthea Zahraii
+
+git:
+  branches:
+    use_own_branch: true
+
+commit:
+  meaningful_messages: true
+
+pull_requests:
+  approvals_required: 2
+
+code_style:
+  python:
+    pep8_compliance: true
+
+dependencies:
+  python: "3.11.5"
+  packages:
+    - absl-py==2.1.0
+    - keras==3.1.1
+    - tensorflow==2.16.1
+    - opencv-python==4.5.3.56
+    - matplotlib==3.4.2
+    - seaborn==0.11.1
+    - scikit-learn==0.24.2
+    # Add other dependencies as needed
+
+project_structure:
+  - clips
+  - data
+  - docs
+  - gray_clips
+  - src:
+      - models
+      - objects:
+          - architecture
+          - data.py
+          - result.py
+          - stack.py
+      - preprocessing.py
+      - augmentation.py
+      - training.py
+      - validation.py
+  - main.ipynb
+  - readme.md
+  - requirements.txt
+
+global_variables:
+  BATCH_SIZE: 8
+
+  paths:
+  data_directory: "data"
+  model_directory: "src/models"
+
+model_configuration:
+  input_shape: [224, 224, 3]
+  epochs: 50
+
+data_preprocessing:
+  custom_methods: true
+  description: "Custom scripts for video processing, image conversion, and dataset augmentation."
+  scripts:
+    - src/preprocessing.py
+    - src/augmentation.py
+
+ci_cd:
+  tool: GitHub Actions
+  on_push:
+    branches:
+      - main
+      - dev*
+  jobs:
+    - build
+    - test
