@@ -2,28 +2,21 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 class ImageAugmenter:
-    def __init__(self, image_width, image_height):
-        self.image_width = image_width
-        self.image_height = image_height
+    def __init__(self, IMG_WIDTH, IMG_HEIGHT):
+        self.IMG_WIDTH = IMG_WIDTH
+        self.IMG_HEIGHT = IMG_HEIGHT
 
-    def augment(self, bw_image, colored_image):
-        '''The main method that augments the images. 
 
-            '''
-            
-        data_gen = ImageDataGenerator(
-            rotation_range=40,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True,
-            fill_mode='constant')
+    def augment(self):
+        '''Applies augmentation to the images.'''
         
-        bw_image = bw_image.reshape((1,) + bw_image.shape)
-        colored_image = colored_image.reshape((1,) + colored_image.shape)
-        
-        bw_image = data_gen.flow(bw_image, batch_size=1)
-        colored_image = data_gen.flow(colored_image, batch_size=1)
+        return ImageDataGenerator(
+            rotation_range=40,       # Random rotations from 0 to 40 degrees
+            width_shift_range=0.2,   # Random horizontal shifts
+            height_shift_range=0.2,  # Random vertical shifts
+            shear_range=0.2,         # Shear transformations
+            zoom_range=0.2,          # Random zoom
+            horizontal_flip=True,    # Enable horizontal flipping
+            fill_mode='nearest'      # Strategy for filling in newly created pixels
+        )
 
-        return bw_image, colored_image
