@@ -5,13 +5,13 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
-def download_video(video_url, resolution='720p'): 
+def download_video(video_url, resolution='360p'): 
     '''
     download a video from youtube
 
     :param video_url: the url of the video 
     :type video_url: str
-    :param resolution: the resolution of the video, defaults to '720p'
+    :param resolution: the resolution of the video, defaults to '360p'
     :type resolution: str, optional
     '''
     youtube = YouTube(video_url)
@@ -23,13 +23,13 @@ def download_video(video_url, resolution='720p'):
     print("download successful")
     
 
-def download_playlist(playlist_url, resolution='720p'): 
+def download_playlist(playlist_url, resolution='360p'): 
     '''
     download all videos in a playlist
 
     :param playlist_url: the url of the playlist
     :type playlist_url: str
-    :param resolution: the resolution of the video, defaults to '720p'
+    :param resolution: the resolution of the video, defaults to '360p'
     :type resolution: str, optional
     '''
     playlist = Playlist(playlist_url)

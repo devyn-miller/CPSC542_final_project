@@ -5,7 +5,7 @@ import os
 
 # https://medium.com/@Ralabs/the-beginners-guide-for-video-processing-with-opencv-aa744ec04abb
 # https://www.geeksforgeeks.org/python-process-images-of-a-video-using-opencv/ 
-def process_video(video_file_location, image_location='../data', resolution=(1280, 720)):
+def process_video(video_file_location, image_location='../data', resolution=(1280, 360)):
     '''
     Takes in a video file location, converts the video to 
     frames and then places them into a folder. 
@@ -15,7 +15,7 @@ def process_video(video_file_location, image_location='../data', resolution=(128
     :type video_file_location: str
     :param image_location: location of the saved images, defaults to '../data'
     :type image_location: str, optional
-    :param resolution: resolution of the video, defaults to (1280, 720)
+    :param resolution: resolution of the video, defaults to (640, 360)
     :type resolution: tuple, optional
     '''
     # Step 1: Create VideoCapture object to read video 
@@ -38,7 +38,7 @@ def process_video(video_file_location, image_location='../data', resolution=(128
         # convert BGR -> grayscale 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
-        cv2.imwrite(os.path.join(image_location, "/bgr", f"bgr_{idx}"), frame)
+        # cv2.imwrite(os.path.join(image_location, "/bgr", f"bgr_{idx}"), frame)
         cv2.imwrite(os.path.join(image_location, "/rgb", f"rgb_{idx}"), rgb)
         cv2.imwrite(os.path.join(image_location, "/gray", f"gray_{idx}"), gray)
         
@@ -54,7 +54,7 @@ def process_video(video_file_location, image_location='../data', resolution=(128
     
     return
 
-def process_videos(video_file_directory, image_location='../data', resolution=(1280, 720)):
+def process_videos(video_file_directory, image_location='../data', resolution=(640, 360)):
     '''
     Takes in all video file locations in a directory, 
     converts the video to frames and then places them into a folder. 
@@ -64,7 +64,7 @@ def process_videos(video_file_directory, image_location='../data', resolution=(1
     :type video_file_directory: str
     :param image_location: location of the saved images, defaults to '../data'
     :type image_location: str, optional
-    :param resolution: resolution of the video, defaults to (1280, 720)
+    :param resolution: resolution of the video, defaults to (640, 360)
     :type resolution: tuple, optional
     '''
     
@@ -153,3 +153,6 @@ def preprocess(video_file_directory, BATCH_SIZE = 8):
     stack = batch_datasets(stack, BATCH_SIZE)
     
     return stack
+
+
+process_video('./cartoons')
