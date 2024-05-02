@@ -1,11 +1,14 @@
-from augmentation import ImageAugmenter
-from objects.stack import Stack
+# from augmentation import ImageAugmenter
+# from objects.stack import Stack
 import cv2
 import os
 
 # https://medium.com/@Ralabs/the-beginners-guide-for-video-processing-with-opencv-aa744ec04abb
 # https://www.geeksforgeeks.org/python-process-images-of-a-video-using-opencv/ 
-def process_video(video_file_location, image_location='../data', resolution=(1280, 360)):
+import os
+import cv2
+
+def process_video(video_file_location, file_num, image_location='./data', resolution=(1280, 360)):
     '''
     Takes in a video file location, converts the video to 
     frames and then places them into a folder. 
@@ -22,25 +25,31 @@ def process_video(video_file_location, image_location='../data', resolution=(128
     cap = cv2.VideoCapture(video_file_location)
     
     idx = 0
+    frame_skip = 10  # Skip every 10 frames
     
     # Step 2: Loop until end of video 
     while (cap.isOpened()): 
-        # create frame-by-frame
+        # Skip frames
+        for _ in range(frame_skip):
+            cap.grab()  # Skip frames without decoding
+        
+        # Read the frame
         ret, frame = cap.read()
-        frame = cv2.resize(frame, resolution)
         
-        # display resulting frame 
-        cv2.imshow('Frame', frame)
+        # Check if frame reading was successful
+        if not ret:
+            print("breaking")
+            break
         
-        # convert BGR -> RGB
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Check if the frame is empty
+        if frame is None:
+            print(f"Warning: Empty frame detected at index {idx}. Skipping...")
+            continue
         
-        # convert BGR -> grayscale 
+        # Process the frame
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        
-        # cv2.imwrite(os.path.join(image_location, "/bgr", f"bgr_{idx}"), frame)
-        cv2.imwrite(os.path.join(image_location, "/rgb", f"rgb_{idx}"), rgb)
-        cv2.imwrite(os.path.join(image_location, "/gray", f"gray_{idx}"), gray)
+        cv2.imwrite(os.path.join(image_location, "./rgb", f"{file_num}_rgb_{idx}.jpeg"), frame)
+        cv2.imwrite(os.path.join(image_location, "./gray", f"{file_num}_gray_{idx}.jpeg"), gray)
         
         idx += 1
         
@@ -48,13 +57,12 @@ def process_video(video_file_location, image_location='../data', resolution=(128
         if cv2.waitKey(1) & 0xFF == ord('q'): 
             break 
         
-        
     cap.release()
-    cap.destoryAllWindows()
-    
+    print('video processed')
     return
 
-def process_videos(video_file_directory, image_location='../data', resolution=(640, 360)):
+
+def process_videos(video_file_directory, image_location='./data', resolution=(640, 360)):
     '''
     Takes in all video file locations in a directory, 
     converts the video to frames and then places them into a folder. 
@@ -67,16 +75,17 @@ def process_videos(video_file_directory, image_location='../data', resolution=(6
     :param resolution: resolution of the video, defaults to (640, 360)
     :type resolution: tuple, optional
     '''
-    
-    for file in video_file_directory:  
+    idx = 0; 
+    for file in os.listdir(video_file_directory):  
         if file.endswith('.mp4'): 
             video_file_location = os.path.join(video_file_directory, file)
-            process_video(video_file_location)
+            process_video(video_file_location, idx)
+            idx += 1
     
     return 
     
 
-def train_test_validation_split(stack, image_location='../data', ):
+def train_test_validation_split(stack, image_location='./data', ):
     '''
     Creates train/test/validation generators and returns them.
     
@@ -155,4 +164,4 @@ def preprocess(video_file_directory, BATCH_SIZE = 8):
     return stack
 
 
-process_video('./cartoons')
+process_videos('./cartoons')
