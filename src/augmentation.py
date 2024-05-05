@@ -1,26 +1,34 @@
 import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
 
-class ImageAugmenter:
-    def __init__(self, image_width, image_height):
-        self.image_width = image_width
-        self.image_height = image_height
+def augment(X_train): 
+    datagen = ImageDataGenerator(
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    horizontal_flip=True,
+    vertical_flip=True
+    )
 
-    def augment(self, bw_image, colored_image):
-        '''The main method that augments the images.  Here are some fun ones:
-        data_gen = ImageDataGenerator(
-            rotation_range=40,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True,
-            fill_mode='constant')
-            if tf.random.uniform(()) > 0.5:
-                image = tf.image.flip_left_right(image)
-            image = tf.image.random_brightness(image, max_delta=0.2)
+    datagen.fit(X_train)
+    
+    X_train_sub = X_train[:10]
 
-            '''
-        
+    plt.figure(figsize=(20,2))
+    for i in range(10):
+        plt.subplot(1, 10, i+1)
+        plt.imshow(X_train_sub[i])
+        plt.suptitle('Original Training Images', fontsize=15)
+        plt.show()
 
-
-        return bw_image, colored_image
+    # Augmented Data
+    plt.figure(figsize=(20,2))
+    for X_batch in datagen.flow(X_train_sub, batch_size=12):
+        for i in range(10):
+            plt.subplot(1, 10, i+1)
+            plt.imshow(X_batch[i])
+        plt.suptitle('Augmented Images', fontsize=15)
+        plt.show()
+        break    
+    
+    return
