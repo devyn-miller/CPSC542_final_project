@@ -26,7 +26,7 @@ def process_video_frames(data_path='data', frame_skip=30) -> list[tuple]:
                 ret, frame = cap.read()
 
                 if not ret:
-                    print(f"{current_frame} total frames")
+                    print(f"{current_frame} total frames, exported {len(frames)} frames...")
                     print(f"Finished processing {video_file}. Exiting ...")
                     break
 
@@ -35,6 +35,7 @@ def process_video_frames(data_path='data', frame_skip=30) -> list[tuple]:
                     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     frames.append((rgb_frame, gray_frame))
+                    
 
                 current_frame += 1
 
