@@ -117,70 +117,45 @@ def process_videos(video_file_directory, image_location='../data', resolution=(6
     
     return 
     
-def dataset(image_location='../data'):
-    types = []
-    rgbs = []
-    grays = []
+def dataset(dataset, image_location='../data'):
+    rgb_path = os.path.join(image_location, dataset, 'rgb')
+    gray_path = os.path.join(image_location, dataset, 'gray')
 
-    # Iterate through each subdirectory
-    for subdir in os.listdir(image_location):
-        subdir_path = os.path.join(image_location, subdir)
-        if os.path.isdir(subdir_path):
-            # Get the type (old, cartoon, vibrant, dark) from the subdirectory name
-            type_name = subdir
-            
-            # Get the paths to rgb and gray directories
-            rgb_path = os.path.join(subdir_path, 'rgb')
-            gray_path = os.path.join(subdir_path, 'gray')
-            
-            # Get the list of files in rgb and gray directories
-            rgb_files = os.listdir(rgb_path)
-            gray_files = os.listdir(gray_path)
-            
-            # Assuming the files are corresponding pairs (same name in both directories)
-            for rgb_file, gray_file in zip(rgb_files, gray_files):
-                # Append the type for each file
-                types.append(type_name)
-                
-                # Append the full paths of the rgb and gray files
-                rgbs.append(os.path.join(rgb_path, rgb_file))
-                grays.append(os.path.join(gray_path, gray_file))
+    # Get the list of files in rgb and gray directories
+    rgb_files = os.listdir(rgb_path)
+    gray_files = os.listdir(gray_path)
+
+    # Assuming the files are corresponding pairs (same name in both directories)
+    rgb_paths = [os.path.join(rgb_path, file) for file in rgb_files]
+    gray_paths = [os.path.join(gray_path, file) for file in gray_files]
 
     # Create DataFrame
-    data = {'type': types, 'rgb': rgbs, 'gray': grays}
+    data = {'RGB': rgb_paths, 'gray': gray_paths}
     df = pd.DataFrame(data)
     
-    return df 
-    
-def normalize(X_train, y_train, X_test, y_test, X_val, y_val): 
-    X_train = X_train.astype('float32') / 255 
-    y_train = y_train.astype('float32') / 255
-    
-    X_test = X_test.astype('float32') / 255
-    y_test = y_test.astype('float32') / 255
-    
-    X_val = X_val.astype('float32') /255 
-    y_val = y_val.astype('float32') / 255   
-    
+    return df
+
+def normalize_images(images):
+    normalized_images = []
+    for img_path in images:
+        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE).astype('float32') / 255.0
+        normalized_images.append(img)
+    return normalized_images
+
+def normalize(X_train, y_train, X_test, y_test, X_val, y_val):
+    X_train = normalize_images(X_train)
+    y_train = normalize_images(y_train)
+
+    X_test = normalize_images(X_test)
+    y_test = normalize_images(y_test)
+
+    X_val = normalize_images(X_val)
+    y_val = normalize_images(y_val)
+
     return X_train, y_train, X_test, y_test, X_val, y_val
 
-def train_test_validation_split(image_location='../data'):
-    '''
-    Creates train/test/validation generators and returns them.
-    
-    Each dataset should be build as following:
-    data['bw_image'] = 1080x720x1
-    data['colored_image'] = 1080x720x3
-
-    :param stack: The stack to be updated 
-    :type stack: Stack
-    :param image_location: _description_, defaults to '../data'
-    :type image_location: str, optional
-    :return: Stack updated with the test/train/validation 
-    :rtype: Stack
-    '''
-    
-    df = dataset(image_location)
+def train_test_validation_split(dataset, image_location='../data'):    
+    df = dataset(dataset, image_location)
     
     X = df['gray']
     y = df['rgb']
@@ -191,5 +166,6 @@ def train_test_validation_split(image_location='../data'):
     X_train, y_train, X_test, y_test, X_val, y_val = normalize(X_train, y_train, X_test, y_test, X_val, y_val)
     
     return X_train, y_train, X_test, y_test, X_val, y_val
-    
-    
+
+
+train_test_validation_split('/old', './data')
