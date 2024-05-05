@@ -117,9 +117,9 @@ def process_videos(video_file_directory, image_location='../data', resolution=(6
     
     return 
     
-def dataset(dataset, image_location='../data'):
-    rgb_path = os.path.join(image_location, dataset, 'rgb')
-    gray_path = os.path.join(image_location, dataset, 'gray')
+def dataset(data_dir, image_location='../data'):    
+    rgb_path = os.path.join(image_location, data_dir, 'rgb')
+    gray_path = os.path.join(image_location, data_dir, 'gray')
 
     # Get the list of files in rgb and gray directories
     rgb_files = os.listdir(rgb_path)
@@ -130,7 +130,7 @@ def dataset(dataset, image_location='../data'):
     gray_paths = [os.path.join(gray_path, file) for file in gray_files]
 
     # Create DataFrame
-    data = {'RGB': rgb_paths, 'gray': gray_paths}
+    data = {'rgb': rgb_paths, 'gray': gray_paths}
     df = pd.DataFrame(data)
     
     return df
@@ -154,8 +154,8 @@ def normalize(X_train, y_train, X_test, y_test, X_val, y_val):
 
     return X_train, y_train, X_test, y_test, X_val, y_val
 
-def train_test_validation_split(dataset, image_location='../data'):    
-    df = dataset(dataset, image_location)
+def train_test_validation_split(data_dir, image_location='../data'):    
+    df = dataset(data_dir, image_location)
     
     X = df['gray']
     y = df['rgb']
@@ -166,6 +166,3 @@ def train_test_validation_split(dataset, image_location='../data'):
     X_train, y_train, X_test, y_test, X_val, y_val = normalize(X_train, y_train, X_test, y_test, X_val, y_val)
     
     return X_train, y_train, X_test, y_test, X_val, y_val
-
-
-train_test_validation_split('/old', './data')
