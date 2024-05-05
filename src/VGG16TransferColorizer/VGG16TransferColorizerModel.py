@@ -10,27 +10,25 @@ from skimage.color import rgb2lab, lab2rgb, gray2rgb
 from helper import *
 
 class VGG16TransferColorizer:
-    def __init__(self, input_shape=(720, 1080)):
-        self.input_shape = input_shape
+    def __init__(self, image_shape=(720, 1080)):
+        self.input_shape = image_shape
         self.encoder = None
         self.decoder = None
         self.is_trained = False
 
     def predict(self, grayscale_image):
         if self.encoder is None or self.decoder is None:
-            self.build_model()
+            print("Tried to predict before model was built")
+            exit()
 
-        # Resize the input image to match the model's input size
-        resized_image = tf.image.resize(grayscale_image, (224, 224))
+        # Convert 1 channel grayscale to RGB (repeat across 3 channels)
+        input_l = gray2rgb(grayscale_image).reshape(((1,) + self.input_shape + (3,)))
+        # Create classification latent space
+        bottleneck = self.encoder.predict(input_l)
+        # Predict ab color channels from the bottleneck latent space
+        output_ab = self.decoder.predict(bottleneck)
 
-        # Add batch dimension
-        resized_image = tf.expand_dims(resized_image, axis=0)
-
-        # Make the prediction
-        predicted_color = self.model.predict(resized_image)
-
-        # Remove batch dimension
-        predicted_color = tf.squeeze(predicted_color, axis=0)
+        return output_ab
 
     def build_model(self):
         model_input = (self.input_shape + (3,))
@@ -45,11 +43,15 @@ class VGG16TransferColorizer:
         for layer in self.encoder.layers:
             layer.trainable = False
 
-        print("building sequential encoder")
+        # Access the output shape of the encoder
+        encoder_output_shape = self.encoder.output_shape[1:] # Drop batch size element
+
+        # Build the decoder model
+        print("Building sequential decoder...")
         self.decoder = Sequential(
             [
                 Conv2D(256, (3,3), activation='relu', padding='same', 
-                    input_shape=self.encoder.output_shape[1:]),
+                    input_shape=encoder_output_shape),
                 Conv2D(128, (3,3), activation='relu', padding='same'),
                 UpSampling2D((2, 2)),
                 Conv2D(64, (3,3), activation='relu', padding='same'),
@@ -64,14 +66,17 @@ class VGG16TransferColorizer:
             ],
             name='ColorizationDecoder'
         )
+        print("Model built! Ready to train.")
 
     def train(self, train_dataset, val_dataset, epochs=10, batch_size=32, learning_rate=0.001, model_file='model.keras', overwrite=True):
         if self.encoder is None or self.decoder is None:
-            self.model = self.build_model()
+            print("Tried to train before model was built")
+            exit()
 
         optimizer = Adam(learning_rate=learning_rate)
         loss_fn = MeanSquaredError()
 
+        print(f"Training VGG16 Transfer Colorizer model for {epochs} epochs...")
         self.model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'])
 
         history = self.model.fit(
@@ -105,32 +110,34 @@ def main():
     TRAIN_EPOCHS: int = 10
     LEARNING_RATE = 0.001
     IMAGE_SHAPE: tuple = (720, 1280)
-    MODEL_FILE: str = 'vgg16_colorizer_model.h5'
+    MODEL_FILE: str = 'vgg16_colorizer_model.keras'
     DATA_DIR = './src/videos/'
+    
+    '''
+    Use Ponthea data processing/loading scripts to load and split the dataset into train and validation sets.
 
-    import matplotlib.pyplot as plt
-    import time
+    train_dataset, val_dataset = load_and_split_dataset(DATA_DIR, IMAGE_SHAPE, batch_size=32)
+
+    colorizer = VGG16TransferColorizer(image_shape=IMAGE_SHAPE)
+    colorizer.build_model()
+    colorizer.train(train_dataset, val_dataset, epochs=TRAIN_EPOCHS, batch_size=32, learning_rate=LEARNING_RATE, model_file=MODEL_FILE)
+    '''
     
     # Load the data
-    full_dataset = tf.keras.utils.image_dataset_from_directory(
-        DATA_DIR,
-        label_mode=None,
-        color_mode='grayscale',
-        batch_size=32,
-        image_size=(IMAGE_SHAPE + (3,))
-    )
-
-    # val_dataset = tf.keras.utils.image_dataset_from_directory(
-    #     val_data_dir,
+    # full_dataset = tf.keras.utils.image_dataset_from_directory(
+    #     DATA_DIR,
     #     label_mode=None,
     #     color_mode='grayscale',
     #     batch_size=32,
     #     image_size=(IMAGE_SHAPE + (3,))
     # )
 
-    # Create an instance of the VGG16TransferColorizer
-    colorizer = VGG16TransferColorizer()
+    train_dataset = None
+    val_dataset = None
 
+    # Create an instance of the VGG16TransferColorizer
+    colorizer = VGG16TransferColorizer(image_shape=IMAGE_SHAPE)
+    colorizer.build_model
     # Train the model
 
     history = colorizer.train(train_dataset, val_dataset, epochs=TRAIN_EPOCHS, learning_rate=LEARNING_RATE, model_file=MODEL_FILE)
@@ -160,4 +167,5 @@ def main():
             val_iterator = iter(val_dataset)
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
     main()
