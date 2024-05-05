@@ -1,14 +1,47 @@
-# from augmentation import ImageAugmenter
-# from objects.stack import Stack
 import cv2
 import os
+import pandas as pd 
+from sklearn.model_selection import train_test_split
 
-# https://medium.com/@Ralabs/the-beginners-guide-for-video-processing-with-opencv-aa744ec04abb
-# https://www.geeksforgeeks.org/python-process-images-of-a-video-using-opencv/ 
-import os
-import cv2
+from pytube import YouTube, Playlist
+import ssl
+from pytube.exceptions import AgeRestrictedError
 
-def process_video(video_file_location, file_num, image_location='./data', resolution=(1280, 360)):
+ssl._create_default_https_context = ssl._create_unverified_context
+
+def download_video(video_url, resolution='360p'): 
+    '''
+    download a video from youtube
+
+    :param video_url: the url of the video 
+    :type video_url: str
+    :param resolution: the resolution of the video, defaults to '360p'
+    :type resolution: str, optional
+    '''
+    try:
+        youtube = YouTube(video_url)
+        youtube = youtube.streams.get_by_resolution(resolution)
+        youtube.download()
+        print("Download successful")
+    except AgeRestrictedError as e:
+        print(f"Age restriction error for video: {video_url}")
+    except Exception as e:
+        print(f"An error has occurred: {e}")
+
+def download_playlist(playlist_url, resolution='360p'): 
+    '''
+    download all videos in a playlist
+
+    :param playlist_url: the url of the playlist
+    :type playlist_url: str
+    :param resolution: the resolution of the video, defaults to '360p'
+    :type resolution: str, optional
+    '''
+    playlist = Playlist(playlist_url)
+    for video_url in playlist.video_urls: 
+        download_video(video_url, resolution)
+
+def process_video(video_file_location, file_num, image_location='../data', resolution=(1280, 360)):
     '''
     Takes in a video file location, converts the video to 
     frames and then places them into a folder. 
@@ -62,7 +95,7 @@ def process_video(video_file_location, file_num, image_location='./data', resolu
     return
 
 
-def process_videos(video_file_directory, image_location='./data', resolution=(640, 360)):
+def process_videos(video_file_directory, image_location='../data', resolution=(640, 360)):
     '''
     Takes in all video file locations in a directory, 
     converts the video to frames and then places them into a folder. 
@@ -78,14 +111,60 @@ def process_videos(video_file_directory, image_location='./data', resolution=(64
     idx = 0; 
     for file in os.listdir(video_file_directory):  
         if file.endswith('.mp4'): 
-            video_file_location = os.path.join(video_file_directory, file)
+            video_file_location = os.path.join(image_location, video_file_directory, file)
             process_video(video_file_location, idx)
             idx += 1
     
     return 
     
+def dataset(image_location='../data'):
+    types = []
+    rgbs = []
+    grays = []
 
-def train_test_validation_split(stack, image_location='./data', ):
+    # Iterate through each subdirectory
+    for subdir in os.listdir(image_location):
+        subdir_path = os.path.join(image_location, subdir)
+        if os.path.isdir(subdir_path):
+            # Get the type (old, cartoon, vibrant, dark) from the subdirectory name
+            type_name = subdir
+            
+            # Get the paths to rgb and gray directories
+            rgb_path = os.path.join(subdir_path, 'rgb')
+            gray_path = os.path.join(subdir_path, 'gray')
+            
+            # Get the list of files in rgb and gray directories
+            rgb_files = os.listdir(rgb_path)
+            gray_files = os.listdir(gray_path)
+            
+            # Assuming the files are corresponding pairs (same name in both directories)
+            for rgb_file, gray_file in zip(rgb_files, gray_files):
+                # Append the type for each file
+                types.append(type_name)
+                
+                # Append the full paths of the rgb and gray files
+                rgbs.append(os.path.join(rgb_path, rgb_file))
+                grays.append(os.path.join(gray_path, gray_file))
+
+    # Create DataFrame
+    data = {'type': types, 'rgb': rgbs, 'gray': grays}
+    df = pd.DataFrame(data)
+    
+    return df 
+    
+def normalize(X_train, y_train, X_test, y_test, X_val, y_val): 
+    X_train = X_train.astype('float32') / 255 
+    y_train = y_train.astype('float32') / 255
+    
+    X_test = X_test.astype('float32') / 255
+    y_test = y_test.astype('float32') / 255
+    
+    X_val = X_val.astype('float32') /255 
+    y_val = y_val.astype('float32') / 255   
+    
+    return X_train, y_train, X_test, y_test, X_val, y_val
+
+def train_test_validation_split(image_location='../data'):
     '''
     Creates train/test/validation generators and returns them.
     
@@ -101,67 +180,16 @@ def train_test_validation_split(stack, image_location='./data', ):
     :rtype: Stack
     '''
     
-    train_dataset = ''
-    test_dataset = ''
-    val_dataset = ''
+    df = dataset(image_location)
     
-    stack.update_datasets(train_dataset, test_dataset, val_dataset)
-    return stack
-
-def augment_datasets(stack):
-    '''
-    This updates the datasets with augmented images, up to 
-    yall what type of augmentation you want to use just make 
-    sure you use the ImageAugmenter class.
-
-    :param stack: The stack to be augmented
-    :type stack: Stack
-    :return: The augmented stack 
-    :rtype: Stack
-    '''
-    augmenter = ImageAugmenter(IMG_WIDTH=1080, IMG_HEIGHT=720)
+    X = df['gray']
+    y = df['rgb']
     
-    train_dataset = augmenter.augment(stack.train_dataset)
-    test_dataset = augmenter.augment(stack.test_dataset)
-    val_dataset = augmenter.augment(stack.val_dataset)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=None)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=None)
     
-    stack.update_datasets(train_dataset, test_dataset, val_dataset)
-    return stack
+    X_train, y_train, X_test, y_test, X_val, y_val = normalize(X_train, y_train, X_test, y_test, X_val, y_val)
     
-
-def batch_datasets(stack, BATCH_SIZE):
-    '''
-    Batches the train, test and validation sets based on 
-    the BATCH_SIZE. BATCH_SIZE is going to depend on your computer.
-    '''
+    return X_train, y_train, X_test, y_test, X_val, y_val
     
-    train_dataset = stack.train_dataset.batch(BATCH_SIZE)
-    test_dataset = stack.test_dataset.batch(BATCH_SIZE)
-    val_dataset = stack.val_dataset.batch(BATCH_SIZE)
     
-    stack.update_datasets(train_dataset, test_dataset, val_dataset)
-    return stack
-
-def preprocess(video_file_directory, BATCH_SIZE = 8):
-    '''
-    This is the method called by main.ipynb. 
-    It also calls all the other functions and 
-    returns the stack which will hold the finished datasets.
-
-    :param video_file_directory: path to the video file directory
-    :type video_file_directory: str
-    :param BATCH_SIZE: the batch size, defaults to 8
-    :type BATCH_SIZE: int, optional
-    :return: the stack with updated datasets
-    :rtype: Stack
-    '''
-    stack = Stack()
-    process_videos(video_file_directory)
-    stack = train_test_validation_split(stack)
-    stack = augment_datasets(stack)
-    stack = batch_datasets(stack, BATCH_SIZE)
-    
-    return stack
-
-
-process_videos('./cartoons')
