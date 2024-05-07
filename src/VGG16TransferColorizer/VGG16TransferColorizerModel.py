@@ -65,7 +65,8 @@ class VGG16TransferColorizer:
         x = UpSampling2D((2, 2))(x)
         x = Conv2D(2, (3, 3), activation='tanh', padding='same')(x)
         x = UpSampling2D((2, 2))(x)
-        x = Lambda(lambda x: tf.image.resize(x, model_input[:2], method=tf.image.ResizeMethod.BILINEAR))(x)
+        # x = Lambda(lambda x: tf.image.resize(x, model_input[:2], method=tf.image.ResizeMethod.BILINEAR))(x)
+        x = Lambda(lambda x: tf.image.resize(x, model_output[:2], method=tf.image.ResizeMethod.BILINEAR), output_shape=model_output)(x)
 
         self.model = Model(inputs=encoder.input, outputs=x)
         print("Combined model built successfully.")
@@ -134,10 +135,10 @@ class VGG16TransferColorizer:
         self.is_trained = True
         return self.train_history
 
-    def load_decoder(self, model_file):
+    def load_model(self, model_file):
         if not os.path.exists(model_file):
             raise FileNotFoundError(f"Model file '{model_file}' not found.")
-
+        tf.keras.config.enable_unsafe_deserialization()
         self.model = tf.keras.models.load_model(model_file)
         self.is_trained = True
         print(f"Model loaded from {model_file}")

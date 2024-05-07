@@ -54,6 +54,16 @@ def data_generator(batch_size, df):
                 
             yield np.array(batch_gray_images), np.array(batch_ab_channels)
 
+def combine_grey_ab(gray_image, ab_channels):
+    # Convert grayscale image to LAB color space
+    lab_image = rgb2lab(gray_image)
+    
+    # Replace the AB channels in the LAB image with the provided AB channels
+    lab_image[:, :, 1:] = ab_channels
+    
+    # Convert the LAB image back to RGB for return
+    return lab2rgb(lab_image)
+
 # display generator grey images, and combined with color channels
 # -> for testing & validation purposes
 def display_images_from_generator(generator):
@@ -65,14 +75,8 @@ def display_images_from_generator(generator):
     # Plot the first 9 images
     plt.figure(figsize=(15, 10))
     for i in range(5):
-        # Convert grayscale image to LAB color space
-        lab_image = rgb2lab(gray_images[i])
         
-        # Replace the AB channels in the LAB image with the provided AB channels
-        lab_image[:, :, 1:] = ab_channels[i]
-        
-        # Convert the LAB image back to RGB for display
-        combined_image = lab2rgb(lab_image)
+        combined_image =  combine_grey_ab(gray_images[i], ab_channels[i])
         
 
         # Display the grayscale image
@@ -104,7 +108,7 @@ def main():
 
     # Display plots of gray/color counterparts in training data
     display_images_from_generator(datagenerator)
-    return
+    # return
     '''
     MODEL TRAINING
     '''
@@ -128,34 +132,6 @@ def main():
     accuracy = history.history['accuracy']  # Extract accuracy values
     print(f"Training loss: {loss}")
     print(f"Training accuracy: {accuracy}")
-
-
-'''
-VALIDATION
-'''
-
-# Make predictions
-# Continuously predict and visualize new images
-'''
-fig, ax = plt.subplots(figsize=(10, 6))
-val_iterator = iter(val_dataset)
-
-while True:
-    try:
-        test_image = next(val_iterator)
-        predicted_color = colorizer.predict(test_image)
-
-        # Display the predicted color image
-        ax.clear()
-        ax.imshow(predicted_color)
-        ax.set_title('Predicted Color Image')
-        ax.axis('off')
-        plt.pause(2)  # Pause for 2 seconds before updating the image
-
-    except StopIteration:
-        # Reset the iterator when the end of the dataset is reached
-        val_iterator = iter(val_dataset)
-'''
 
 if __name__ == '__main__':
     main()

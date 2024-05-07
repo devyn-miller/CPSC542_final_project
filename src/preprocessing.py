@@ -122,8 +122,9 @@ def dataset(data_dir, image_location='../data'):
     gray_path = os.path.join(image_location, data_dir, 'gray')
 
     # Get the list of files in rgb and gray directories and sort them
-    rgb_files = sorted(os.listdir(rgb_path))
-    gray_files = sorted(os.listdir(gray_path))
+    rgb_files = sorted([f for f in os.listdir(rgb_path) if f.endswith(('.jpg', '.png', '.jpeg'))])
+    gray_files = sorted([f for f in os.listdir(gray_path) if f.endswith(('.jpg', '.png', '.jpeg'))])
+
 
     # Assuming the files are corresponding pairs (same name in both directories)
     rgb_paths = [os.path.join(rgb_path, file) for file in rgb_files]
