@@ -61,7 +61,7 @@ def data_generator(batch_size, df):
 # Using Ponthea dataset filepath generator
 data_dir = 'vibrant'
 image_paths_df = dataset(data_dir, image_location='data/')
-
+steps_per_epoch = len(image_paths_df) // BATCH_SIZE
 # Establish generator
 datagenerator = data_generator(BATCH_SIZE, image_paths_df)
 
@@ -115,10 +115,11 @@ colorizer.model.summary()
 # Train model
 history = colorizer.train_with_generator(
     datagenerator,
+    steps_per_epoch=steps_per_epoch,
     epochs=TRAIN_EPOCHS,
     batch_size=BATCH_SIZE,
     learning_rate=LEARNING_RATE,
-    model_file=MODEL_FILE
+    model_file=MODEL_FILE,
 )
 
 loss = history.history['loss']  # Extract loss values

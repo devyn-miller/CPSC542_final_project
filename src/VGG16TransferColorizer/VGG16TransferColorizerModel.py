@@ -95,13 +95,13 @@ class VGG16TransferColorizer:
         if os.path.exists(model_file) and not overwrite:
             print(f"Warning: {model_file} already exists and will not be overwritten.")
         else:
-            self.decoder.save(model_file)
+            self.model.save(model_file)
             print(f"Model saved to {model_file}")
 
         self.is_trained = True
         return history
 
-    def train_with_generator(self, datagenerator, epochs=10, batch_size=32, learning_rate=0.001, model_file=f'colorizer_decoder.keras', overwrite=True):
+    def train_with_generator(self, datagenerator, steps_per_epoch, epochs=10, batch_size=32, learning_rate=0.001, model_file=f'colorizer_decoder.keras', overwrite=True):
 
         if self.model is None:
             print("Tried to train before model was built")
@@ -117,6 +117,7 @@ class VGG16TransferColorizer:
         print(f"Training VGG16 Transfer Colorizer model for {epochs} epochs...")
         history = self.model.fit(
             datagenerator,
+            steps_per_epoch=steps_per_epoch,
             epochs=epochs,
             batch_size=batch_size,
             verbose=1
