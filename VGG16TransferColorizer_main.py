@@ -26,12 +26,15 @@ DATA GENERATION
 # Define data iterator
 def data_generator(batch_size, df):
     num_samples = len(df)
+    indices = np.arange(num_samples)
+
     while True:
-        # Shuffle the DataFrame for each epoch
-        df_shuffled = df.sample(frac=1).reset_index(drop=True)
+        # Shuffle the indices for each epoch
+        np.random.shuffle(indices)
         
         for i in range(0, num_samples, batch_size):
-            batch_df = df_shuffled.iloc[i:i+batch_size]
+            batch_indices = indices[i:i+batch_size]
+            batch_df = df.iloc[batch_indices]
             batch_gray_images = []
             batch_ab_channels = []
             
