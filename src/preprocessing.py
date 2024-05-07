@@ -13,37 +13,40 @@ import shutil
 import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-def process_video(video_file_location, image_location='./data', frame_count=None, duration=None, resolution=(1280, 720)):
-    '''Takes in a video file location, converts the video to a 
-    bunch of images and then places them into a folder. 
-    (if unspecified then it places it in the data folder)
-    '''
+def process_video(video_file_location, image_location='./data', frame_interval=5, resolution=(1280, 720)):
+    '''Takes in a video file location, converts the video to images, and saves every nth frame (defined by frame_interval) to a folder.'''
+    # Ensure the directory exists
+    if not os.path.exists(image_location):
+        os.makedirs(image_location)
+
     vidcap = cv2.VideoCapture(video_file_location)
     success, image = vidcap.read()
     count = 0
-    while success:
-        if frame_count and count >= frame_count:
-            break
-        image_resized = cv2.resize(image, resolution)
-        frame_path = os.path.join(image_location, f"frame{count}.jpg")
-        cv2.imwrite(frame_path, image_resized)     # save frame as JPEG file      
-        
-        success, image = vidcap.read()
-        count += 1
+    saved_frame_count = 0  # To count how many frames have been saved
 
-def process_all_videos(directory, image_location='./data'):
+    while success:
+        if count % frame_interval == 0:  # Check if the current frame number is divisible by frame_interval
+            image_resized = cv2.resize(image, resolution)
+            frame_path = os.path.join(image_location, f"frame{saved_frame_count}.jpg")
+            cv2.imwrite(frame_path, image_resized)  # Save frame as JPEG file
+            saved_frame_count += 1
+        count += 1  # Increment the total frame count regardless of whether you saved it
+        success, image = vidcap.read()
+
+    vidcap.release()  # Release the video capture object
+
+
+def process_all_videos(directory, image_location, resolution=(1280, 720)):
     frame_count = input("Enter the number of frames you want to extract (leave blank for all): ")
-    duration = input("Enter the duration of the video to process in seconds (leave blank for full video): ")
-    resolution_input = input("Enter the desired resolution as width x height (leave blank for 720p): ")
+    #duration = input("Enter the duration of the video to process in seconds (leave blank for full video): ")
 
     frame_count = int(frame_count) if frame_count else None
-    duration = int(duration) if duration else None
-    resolution = tuple(map(int, resolution_input.split('x'))) if resolution_input else (1280, 720)
+    #duration = int(duration) if duration else None
 
     for filename in os.listdir(directory):
         if filename.endswith(".mp4"):
             video_file_location = os.path.join(directory, filename)
-            process_video(video_file_location, image_location, frame_count=frame_count, duration=duration, resolution=resolution)
+            process_video(video_file_location, image_location, frame_interval=frame_count, resolution=resolution)
 
     
     
@@ -191,7 +194,7 @@ def preprocess(BATCH_SIZE = 8, RESOLUTION = (480, 360)):
     the finished datasets.
     '''
     stack = Stack()
-    process_all_videos('./data/movies', './data/images')
+    process_all_videos('./data/movies', './data/images', RESOLUTION)
     stack = train_test_validation_split(stack, BATCH_SIZE, RESOLUTION)
     
     return stack

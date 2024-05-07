@@ -97,20 +97,20 @@ def run_tuner(stack, c):
     return tuner
 
 def get_best_model(stack):
-    '''c = {
-        "max_trials": 4,
-        "executions_per_trial": 1,
-        "epochs": 10,
-        "patience": 3
-        "m": 5
-    }'''
     c = {
+        "max_trials": 20,
+        "executions_per_trial": 2,
+        "epochs": 50,
+        "patience": 5,
+        "m": 5
+    }
+    '''c = {
         "max_trials": 4,
         "executions_per_trial": 1,
         "epochs": 2,
         "patience": 1,
         "m": 1
-    }
+    }'''
     
     tuner = run_tuner(stack, c)
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]

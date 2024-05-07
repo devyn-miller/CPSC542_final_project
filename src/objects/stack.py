@@ -1,5 +1,6 @@
 import importlib
 from architecture.conv_autoencoder import ConvAutoencoder
+from architecture.VGG16_Transfer import VGG16_transfer
 
 
 class Stack:
@@ -28,9 +29,13 @@ class Stack:
         self.test_generator = test_generator
         self.val_generator = val_generator
         
-    def create_model(self, hp, model_type='conv_autoencoder'):
+    def create_model(self, hp, model_type='VGG16_transfer'):
+        input_shape = (self.img_width, self.img_height, 1)
         if model_type is "conv_autoencoder":
-            self.architecture = ConvAutoencoder()
+            self.architecture = ConvAutoencoder(input_shape)
+            self.model = self.architecture.build_model(hp)
+        elif model_type is "VGG16_transfer":
+            self.architecture = VGG16_transfer(input_shape)
             self.model = self.architecture.build_model(hp)
         
         return self.model

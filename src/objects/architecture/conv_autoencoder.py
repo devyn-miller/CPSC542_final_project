@@ -6,18 +6,18 @@ import kerastuner as kt
 
 class ConvAutoencoder:
     '''Will be the main class for our model'''
-    def __init__(self):
-        self.test = None
+    def __init__(self, input_shape):
+        self.input_shape = input_shape
     
     def build_model(self, hp):
         print("HEREHREHERHEHRHEHRHEHRHEHRHEHRH")
-        input_shape = (1080, 720, 1)  # Adjust based on your dataset
+        input_shape = self.input_shape  # Adjust based on your dataset
         inputs = Input(shape=input_shape)
 
         # Hyperparameters
         num_blocks = hp.Int('num_blocks', min_value=1, max_value=3, step=1)
-        initial_num_filters = hp.Int('initial_num_filters', min_value=16, max_value=128, step=16)
-        conv_layers = hp.Int('conv_layers', min_value=1, max_value=3, step=1)
+        initial_num_filters = hp.Int('initial_num_filters', min_value=16, max_value=64, step=16)
+        conv_layers = hp.Int('conv_layers', min_value=1, max_value=2, step=1)
 
         x = inputs
 
