@@ -26,6 +26,7 @@ class VGG16TransferColorizer:
         self.input_shape = image_shape
         self.is_trained = False
         self.model = None
+        self.train_history = None
 
     def predict(self, grayscale_image):
         if self.model is None:
@@ -83,7 +84,7 @@ class VGG16TransferColorizer:
         self.model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'])
         # Train model
         print(f"Training VGG16 Transfer Colorizer model for {epochs} epochs...")
-        history = self.model.fit(
+        self.train_history = self.model.fit(
             train_l,
             ground_truth_ab,
             epochs=epochs,
@@ -99,7 +100,7 @@ class VGG16TransferColorizer:
             print(f"Model saved to {model_file}")
 
         self.is_trained = True
-        return history
+        return self.train_history
 
     def train_with_generator(self, datagenerator, steps_per_epoch, epochs=10, batch_size=32, learning_rate=0.001, model_file=f'colorizer_decoder.keras', overwrite=True):
 
@@ -115,7 +116,7 @@ class VGG16TransferColorizer:
         self.model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'])
         # Train decoder model
         print(f"Training VGG16 Transfer Colorizer model for {epochs} epochs...")
-        history = self.model.fit(
+        self.train_history = self.model.fit(
             datagenerator,
             steps_per_epoch=steps_per_epoch,
             epochs=epochs,
@@ -131,7 +132,7 @@ class VGG16TransferColorizer:
             print(f"Model saved to {model_file}")
 
         self.is_trained = True
-        return history
+        return self.train_history
 
     def load_decoder(self, model_file):
         if not os.path.exists(model_file):
