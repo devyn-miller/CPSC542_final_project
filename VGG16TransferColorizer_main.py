@@ -18,12 +18,8 @@ DATA_DIR = './src/videos/'
 
 print("working")
 
-
-'''
-DATA GENERATION
-'''
-
-# Define data iterator
+# Define data iterator 
+# Helps to decrease memory usage
 def data_generator(batch_size, df):
     num_samples = len(df)
     indices = np.arange(num_samples)
@@ -58,15 +54,9 @@ def data_generator(batch_size, df):
                 
             yield np.array(batch_gray_images), np.array(batch_ab_channels)
 
-# Using Ponthea dataset filepath generator
-data_dir = 'vibrant'
-image_paths_df = dataset(data_dir, image_location='data/')
-steps_per_epoch = len(image_paths_df) // BATCH_SIZE
-# Establish generator
-datagenerator = data_generator(BATCH_SIZE, image_paths_df)
-
-
-def show_images_from_generator(generator):
+# display generator grey images, and combined with color channels
+# -> for testing & validation purposes
+def display_images_from_generator(generator):
     # Get a batch of images from the generator
     gray_images, ab_channels = next(generator)
     print(gray_images.shape)
@@ -100,32 +90,44 @@ def show_images_from_generator(generator):
     plt.tight_layout()
     plt.show()
 
-# Display plots of gray/color counterparts in training data
-# show_images_from_generator(datagenerator)
+def main():
 
-'''
-MODEL TRAINING
-'''
+    '''
+    DATA GENERATION
+    '''
+    # Using Ponthea dataset filepath generator
+    data_dir = 'vibrant'
+    image_paths_df = dataset(data_dir, image_location='data/')
+    steps_per_epoch = len(image_paths_df) // BATCH_SIZE
+    # Establish generator
+    datagenerator = data_generator(BATCH_SIZE, image_paths_df)
 
-# Create an instance of the VGG16TransferColorizer
-colorizer = VGG16TransferColorizer(image_shape=IMAGE_SHAPE)
-# Build model
-colorizer.build_model()
-colorizer.model.summary()
-# Train model
-history = colorizer.train_with_generator(
-    datagenerator,
-    steps_per_epoch=steps_per_epoch,
-    epochs=TRAIN_EPOCHS,
-    batch_size=BATCH_SIZE,
-    learning_rate=LEARNING_RATE,
-    model_file=MODEL_FILE,
-)
+    # Display plots of gray/color counterparts in training data
+    display_images_from_generator(datagenerator)
+    return
+    '''
+    MODEL TRAINING
+    '''
 
-loss = history.history['loss']  # Extract loss values
-accuracy = history.history['accuracy']  # Extract accuracy values
-print(f"Training loss: {loss}")
-print(f"Training accuracy: {accuracy}")
+    # Create an instance of the VGG16TransferColorizer
+    colorizer = VGG16TransferColorizer(image_shape=IMAGE_SHAPE)
+    # Build model
+    colorizer.build_model()
+    colorizer.model.summary()
+    # Train model
+    history = colorizer.train_with_generator(
+        datagenerator,
+        steps_per_epoch=steps_per_epoch,
+        epochs=TRAIN_EPOCHS,
+        batch_size=BATCH_SIZE,
+        learning_rate=LEARNING_RATE,
+        model_file=MODEL_FILE,
+    )
+
+    loss = history.history['loss']  # Extract loss values
+    accuracy = history.history['accuracy']  # Extract accuracy values
+    print(f"Training loss: {loss}")
+    print(f"Training accuracy: {accuracy}")
 
 
 '''
@@ -154,3 +156,6 @@ while True:
         # Reset the iterator when the end of the dataset is reached
         val_iterator = iter(val_dataset)
 '''
+
+if __name__ == '__main__':
+    main()
