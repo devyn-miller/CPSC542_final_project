@@ -1,15 +1,46 @@
+import numpy as np
 import tensorflow as tf
-from objects.result import Result
-from preprocessing import preprocess 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+
+def create_placeholder_model(input_shape=(224, 224, 3)):
+    model = Sequential([
+        Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+        MaxPooling2D((2, 2)),
+        Conv2D(64, (3, 3), activation='relu'),
+        MaxPooling2D((2, 2)),
+        Flatten(),
+        Dense(64, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    return model
+
 class Validator:
-    def __init__(self, model_path):
-        self.model = tf.keras.models.load_model(model_path)
-        self.result = Result()
+    def __init__(self, model=None):
+        if model is None:
+            self.model = create_placeholder_model()
+        else:
+            self.model = model
+
+    def generate_placeholder_data(self, num_samples=100, image_size=(224, 224, 3)):
+        # Generate random images
+        images = np.random.rand(num_samples, *image_size)
+        # Generate random labels (binary labels in this case)
+        labels = np.random.randint(0, 2, size=(num_samples,))
+        return images, labels
 
     def validate(self, validation_data):
         '''Evaluates the model on the validation data.'''
-        processed_data = preprocess(validation_data)  # Preprocess validation data
-        evaluation_metrics = self.model.evaluate(processed_data)
-        # Utilize Result class methods as needed, e.g., to save or visualize evaluation results
-        self.result.save_evaluation(evaluation_metrics)  # Ensure this method exists in Result class
+        # Assuming validation_data is a tuple (images, labels)
+        images, labels = validation_data
+        evaluation_metrics = self.model.evaluate(images, labels)
+        print("Evaluation Metrics:", evaluation_metrics)
         return evaluation_metrics
+
+# Example usage
+if __name__ == "__main__":
+    validator = Validator()  # Automatically creates a placeholder model
+    placeholder_data = validator.generate_placeholder_data()
+    validator.validate(placeholder_data)
+    validator.validate(placeholder_data)
