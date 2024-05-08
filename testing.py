@@ -7,16 +7,16 @@ from PIL import Image
 from skimage.color import rgb2lab, lab2rgb, gray2rgb
 
 IMAGE_SHAPE: tuple = (360,640)
-MODEL_FILE: str = 'vgg16_colorizer_model.keras'
-old_colorizer = VGG16TransferColorizer(image_shape=IMAGE_SHAPE)
-old_colorizer.load_model(MODEL_FILE)
-
+MODEL_FILE: str = 'vgg16_colorizer_model2.keras'
 colorizer = VGG16TransferColorizer(image_shape=IMAGE_SHAPE)
-colorizer.build_model()
-print(colorizer.model.output)
-# Load the pre-trained weights into the modified model
-colorizer.model.set_weights(old_colorizer.model.get_weights())
-colorizer.is_trained = True
+colorizer.load_model(MODEL_FILE)
+
+# colorizer = VGG16TransferColorizer(image_shape=IMAGE_SHAPE)
+# colorizer.build_model()
+# print(colorizer.model.output)
+# # Load the pre-trained weights into the modified model
+# colorizer.model.set_weights(old_colorizer.model.get_weights())
+# colorizer.is_trained = True
 
 '''
 VALIDATION
@@ -54,15 +54,25 @@ def load_image(image_path, image_shape):
 # Make predictions
 # Continuously predict and visualize new images
 
-data_dir = 'vibrant'
-image_paths = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.jpg') or f.endswith('.png')]
+def combine_grey_ab(gray_image, ab_channels):
+    # Convert grayscale image to LAB color space
+    lab_image = rgb2lab(gray_image)
+    
+    # Replace the AB channels in the LAB image with the provided AB channels
+    lab_image[:, :, 1:] = ab_channels
+    
+    # Convert the LAB image back to RGB for return
+    return lab2rgb(lab_image)
+
+data_dir = 'data/vibrant/gray'
+image_paths = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.jpg') or f.endswith('.jpeg')]
 
 fig, ax = plt.subplots(figsize=(10, 6))
 
 for image_path in image_paths:
     test_image = load_image(image_path, IMAGE_SHAPE)
     predicted_color = colorizer.predict(test_image)
-
+    img = combine_grey_ab(test_image, predicted_color[0])
     # Display the predicted color image
     ax.clear()
     ax.imshow(predicted_color)
