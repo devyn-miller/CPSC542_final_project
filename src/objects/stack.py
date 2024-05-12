@@ -1,6 +1,6 @@
 import importlib
 from architecture.conv_autoencoder import ConvAutoencoder
-from architecture.VGG16_Transfer import VGG16_transfer
+from architecture.VGG16_transfer import VGG16_transfer
 
 
 class Stack:
@@ -15,21 +15,31 @@ class Stack:
         self.final_model = None
         self.final_history = None
         
-        self.train_generator = None
-        self.test_generator = None
-        self.val_generator = None
+        self.train_list = None
+        self.test_list = None
+        self.val_list = None
+        self.bw_train_list = None
+        self.bw_test_list = None
+        self.bw_val_list = None 
         
         self.img_width = None
         self.img_height = None
         
-    def update_datasets(self, train_generator, test_generator, val_generator):
+    def update_rgb(self, train_list, test_list, val_list):
         '''Updates variables dataset_train, test_dataset, val_dataset in stack.
         '''
-        self.train_generator = train_generator
-        self.test_generator = test_generator
-        self.val_generator = val_generator
+        self.train_list = train_list
+        self.test_list = test_list
+        self.val_list = val_list
         
-    def create_model(self, hp, model_type='VGG16_transfer'):
+    def update_bw(self, bw_train_list, bw_test_list, bw_val_list):
+        '''Updates variables dataset_train, test_dataset, val_dataset in stack.
+        '''
+        self.bw_train_list = bw_train_list
+        self.bw_test_list = bw_test_list
+        self.bw_val_list = bw_val_list    
+    
+    def create_model(self, hp, model_type='conv_autoencoder'):
         input_shape = (self.img_width, self.img_height, 1)
         if model_type is "conv_autoencoder":
             self.architecture = ConvAutoencoder(input_shape)

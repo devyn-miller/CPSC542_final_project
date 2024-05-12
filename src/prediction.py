@@ -1,6 +1,6 @@
 import tensorflow as tf
 from src.objects.result import Result
-from src.preprocessing import preprocess
+from src.preprocess.preprocessing import preprocess
 
 class Predictor:
     def __init__(self, model_path):

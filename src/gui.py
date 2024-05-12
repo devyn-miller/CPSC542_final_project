@@ -1,5 +1,5 @@
 import tkinter as tk
-from src.preprocessing import process_all_videos
+from src.preprocess.preprocessing import process_all_videos
 
 def on_enter():
     frame_count = frame_count_var.get()
