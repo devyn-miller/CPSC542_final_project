@@ -17,7 +17,7 @@ class ConvAutoencoder:
         # Hyperparameters
         num_blocks = hp.Int('num_blocks', min_value=1, max_value=3, step=1)
         initial_num_filters = hp.Int('initial_num_filters', min_value=16, max_value=64, step=16)
-        conv_layers = hp.Int('conv_layers', min_value=1, max_value=1, step=1)
+        conv_layers = hp.Int('conv_layers', min_value=1, max_value=2, step=1)
 
         x = inputs
 

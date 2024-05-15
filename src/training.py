@@ -71,9 +71,9 @@ def get_best_model(stack):
     c = {
         "max_trials": 20,
         "executions_per_trial": 2,
-        "epochs": 300,
-        "patience": 5,
-        "m": 5
+        "epochs": 50,
+        "patience": 15,
+        "m": 6
     }
     '''c = {
         "max_trials": 4,
@@ -87,14 +87,13 @@ def get_best_model(stack):
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
     best_model = stack.create_model(best_hps)
     
-    stop_early = EarlyStopping(monitor='val_loss', patience=c["patience"]*c["m"])
+    stop_early = EarlyStopping(monitor='val_loss', patience=c["patience"])
 
     history = best_model.fit(
-        black_and_white_generator(stack.train_generator), stack.train_generator,
-        steps_per_epoch=stack.train_generator.samples // stack.train_generator.batch_size,
+        x=stack.bw_train_list,  # Inputs for the model (Color images)
+        y=stack.train_list,  # Targets for the model (Grayscale images)
         epochs=c["epochs"]*c["m"],  # Train for more epochs
-        validation_data=(black_and_white_generator(stack.val_generator), stack.val_generator),
-        validation_steps=stack.val_generator.samples // stack.val_generator.batch_size,
+        validation_data=(stack.bw_val_list, stack.val_list),  # Validation data as a tuple of (inputs, targets)
         callbacks=[stop_early]
     )
 
