@@ -1,6 +1,6 @@
 import tensorflow as tf
-from objects.result import Result
-from preprocessing import preprocess
+from src.objects.result import Result
+from src.preprocess.preprocessing import preprocess
 
 class Predictor:
     def __init__(self, model_path):
@@ -12,5 +12,8 @@ class Predictor:
         processed_data = preprocess(input_data)  # Use the imported function
         predictions = self.model.predict(processed_data)
         # Utilize Result class methods as needed
-        self.result.save_predictions(predictions)  # Ensure this method exists in Result class
+        if hasattr(self.result, 'save_predictions'):
+            self.result.save_predictions(predictions)
+        else:
+            raise AttributeError("Result class does not have a 'save_predictions' method")
         return predictions

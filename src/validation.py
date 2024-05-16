@@ -1,9 +1,9 @@
-import tensorflow as tf
+import tensorflow.keras.models
 from objects.result import Result
-from preprocessing import preprocess 
+from src.preprocess.preprocessing import preprocess 
 class Validator:
     def __init__(self, model_path):
-        self.model = tf.keras.models.load_model(model_path)
+        self.model = tensorflow.keras.models.load_model(model_path)
         self.result = Result()
 
     def validate(self, validation_data):

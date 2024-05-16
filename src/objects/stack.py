@@ -1,11 +1,13 @@
-from data import Data
-from objects.architecture.conv_autoencoder import ConvAutoencoder
+import importlib
+from architecture.conv_autoencoder import ConvAutoencoder
+from architecture.VGG16_transfer import VGG16_transfer
+
 
 class Stack:
     '''This class holds the data, model, architecture, and results
     '''
     def __init__(self):
-        self.data = Data()
+        #self.data = Data()
         
         self.architecture = None
         self.model = None
@@ -13,27 +15,39 @@ class Stack:
         self.final_model = None
         self.final_history = None
         
-    def update_datasets(self, train_dataset, test_dataset, val_dataset):
+        self.train_list = None
+        self.test_list = None
+        self.val_list = None
+        self.bw_train_list = None
+        self.bw_test_list = None
+        self.bw_val_list = None 
+        
+        self.img_width = None
+        self.img_height = None
+        
+    def update_rgb(self, train_list, test_list, val_list):
         '''Updates variables dataset_train, test_dataset, val_dataset in stack.
         '''
-        self.train_dataset = train_dataset
-        self.test_dataset = test_dataset
-        self.val_dataset = val_dataset
+        self.train_list = train_list
+        self.test_list = test_list
+        self.val_list = val_list
         
-    def create_model(self, hp, model_type='conv_autoencoder'):
-        if model_type is "conv_autoencoder":
-            self.architecture = ConvAutoencoder()
-            self.model = self.architecture(hp)
-            
-            print("hello")
-        elif model_type is "NoGAN":
-            #call NoGAN.py for model creation
-            print("hello")
-        '''Creates a ML model using the given model type and updates self.model
+    def update_bw(self, bw_train_list, bw_test_list, bw_val_list):
+        '''Updates variables dataset_train, test_dataset, val_dataset in stack.
         '''
-        if model_type is 'ConvAutoencoder':
-            '''Create the ConvAutoencoder architecture.'''
-
+        self.bw_train_list = bw_train_list
+        self.bw_test_list = bw_test_list
+        self.bw_val_list = bw_val_list    
+    
+    def create_model(self, hp, model_type='conv_autoencoder'):
+        input_shape = (self.img_width, self.img_height, 1)
+        if model_type is "conv_autoencoder":
+            self.architecture = ConvAutoencoder(input_shape)
+            self.model = self.architecture.build_model(hp)
+        elif model_type is "VGG16_transfer":
+            self.architecture = VGG16_transfer(input_shape)
+            self.model = self.architecture.build_model(hp)
+        
         return self.model
     
     def finished_model(self, final_model, final_history):
@@ -41,5 +55,8 @@ class Stack:
         self.final_model = final_model
         self.final_history = final_history
         
+    def update_dimensions(self, width, height):
+        self.img_width = width
+        self.img_height = height
 
         

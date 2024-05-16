@@ -6,28 +6,32 @@ import kerastuner as kt
 
 class ConvAutoencoder:
     '''Will be the main class for our model'''
-    def __init__(self):
-        pass
+    def __init__(self, input_shape):
+        self.input_shape = input_shape
     
     def build_model(self, hp):
-        input_shape = (720, 1080, 1)  # Adjust based on your dataset
+        print("HEREHREHERHEHRHEHRHEHRHEHRHEHRH")
+        input_shape = self.input_shape  # Adjust based on your dataset
         inputs = Input(shape=input_shape)
 
         # Hyperparameters
-        num_blocks = hp.Int('num_blocks', min_value=2, max_value=6, step=1)
-        initial_num_filters = hp.Int('initial_num_filters', min_value=16, max_value=128, step=16)
-        conv_layers = hp.Int('conv_layers', min_value=1, max_value=3, step=1)
+        num_blocks = hp.Int('num_blocks', min_value=1, max_value=3, step=1)
+        initial_num_filters = hp.Int('initial_num_filters', min_value=16, max_value=64, step=16)
+        conv_layers = hp.Int('conv_layers', min_value=1, max_value=2, step=1)
 
         x = inputs
 
         # Encoder
+        print(range(num_blocks))
         for i in range(num_blocks):
             num_filters = initial_num_filters * (2 ** i)
+            # Hyperparameter
             filter_size = hp.Int('filter_size', min_value=3, max_value=5, step=1)
             
             for i in range(conv_layers):
                 x = self.conv_block(x, num_filters, filter_size)
             x = MaxPooling2D((2, 2))(x)
+            print("here")
 
         # Bottleneck
         num_filters *= 2
@@ -38,6 +42,7 @@ class ConvAutoencoder:
         for i in reversed(range(num_blocks)):
             num_filters = initial_num_filters * (2 ** i)
             x = UpSampling2D((2, 2))(x)
+            # Hyperparamter
             filter_size = hp.Int('filter_size', min_value=3, max_value=5, step=1)
 
             for i in range(conv_layers):
@@ -50,6 +55,8 @@ class ConvAutoencoder:
         model.compile(optimizer='adam',
                     loss="mse",  # Mean Squared Error is often used for reconstruction losses
                     metrics=['accuracy'])
+        
+        model.summary()
 
         return model
     
