@@ -52,6 +52,7 @@ class ImageDataGenerator(Sequence):
         """
         Actions to be taken at the end of each epoch.
         """
+        print("epoch ended")
         if self.is_train:  # Only shuffle if this is a training generator.
             np.random.shuffle(self.image_files)  # Shuffle the order of the input images.
 
@@ -82,5 +83,5 @@ class ImageDataGenerator(Sequence):
             img_ab = img_lab[:, :, 1:]  # Use only AB channels.
             output_batch.append(img_ab)
         
-        return np.array(input_batch), np.array(output_batch)  # Return the batches of processed images as numpy arrays.
+        return np.array(input_batch)/255, (np.array(output_batch, dtype=np.uint8) -127.5)/127.5  # Return the batches of processed images as numpy arrays.
 
