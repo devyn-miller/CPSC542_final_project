@@ -40,7 +40,7 @@ def process_all_videos(directory, image_location, resolution=(1280, 720)):
     frame_count = input("Enter the number of frames you want to extract (leave blank for all): ")
     #duration = input("Enter the duration of the video to process in seconds (leave blank for full video): ")
 
-    frame_count = int(frame_count) if frame_count else None
+    frame_count = int(frame_count) if frame_count else 1
     #duration = int(duration) if duration else None
 
     for filename in os.listdir(directory):
@@ -156,7 +156,7 @@ def train_test_validation_split(stack, BATCH_SIZE, RESOLUTION, image_location='.
     stack.update_bw(bw_train_list, bw_val_list, bw_test_list)
     return stack
 
-def preprocess(BATCH_SIZE = 8, RESOLUTION = (480, 360)):
+def preprocess(BATCH_SIZE = 8, RESOLUTION = (480, 360), ):
     '''This is the method called by main.ipynb.  It also calls 
     all the other functions and returns the stack which will hold 
     the finished datasets.
