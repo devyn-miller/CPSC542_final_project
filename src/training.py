@@ -85,9 +85,9 @@ def get_best_model(stack):
     
     tuner = run_tuner(stack, c)
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
-    best_model = stack.create_model(best_hps)
+    best_model = stack.create_model(best_hps, "conv_autoencoder_simple")
     
-    stop_early = EarlyStopping(monitor='val_loss', patience=c["patience"])
+    stop_early = EarlyStopping(monitor='val_loss', patience=c["patience"]*c["m"])
 
     history = best_model.fit(
         x=stack.bw_train_list,  # Inputs for the model (Color images)
@@ -100,6 +100,21 @@ def get_best_model(stack):
     datetime_str = datetime.now().strftime("%Y%m%d-%H%M%S")
     best_model.save(f'../models/model_{datetime_str}.weights.h5')
     stack.finished_model(best_model, history)
+    stack.add_tuner(tuner)
+    
+    '''
+    trials = tuner.oracle.get_trials()
+
+    # Iterate over the trials and print accuracies
+    for trial in trials:
+        trial_id = trial.trial_id
+        train_accuracy = trial.metrics.get_best_value('accuracy')
+        val_accuracy = trial.metrics.get_best_value('val_accuracy')
+        print(f'Trial ID: {trial_id}')
+        print(f'  Training Accuracy: {train_accuracy}')
+        print(f'  Validation Accuracy: {val_accuracy}')
+    '''
+    
     return stack
 
 def evaluate_model_performance(model, dataset_val):

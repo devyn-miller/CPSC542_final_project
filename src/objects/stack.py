@@ -43,10 +43,14 @@ class Stack:
         input_shape = (self.img_width, self.img_height, 1)
         if model_type is "conv_autoencoder":
             self.architecture = ConvAutoencoder(input_shape)
-            self.model = self.architecture.build_model(hp)
+            #self.model = self.architecture.build_model(hp)
+            self.model = self.architecture.build_model2()
         elif model_type is "VGG16_transfer":
             self.architecture = VGG16_transfer(input_shape)
             self.model = self.architecture.build_model(hp)
+        elif model_type is "conv_autoencoder_simple":
+            self.architecture = ConvAutoencoder(input_shape)
+            self.model = self.architecture.build_model2(hp)
         
         return self.model
     
@@ -59,4 +63,6 @@ class Stack:
         self.img_width = width
         self.img_height = height
 
+    def add_tuner(self, tuner):
+        self.tuner = tuner
         

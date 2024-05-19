@@ -3,6 +3,7 @@ from tensorflow.keras import Input, Model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Concatenate, BatchNormalization
 from tensorflow.keras.callbacks import EarlyStopping
 import kerastuner as kt
+import keras 
 
 class ConvAutoencoder:
     '''Will be the main class for our model'''
@@ -58,6 +59,34 @@ class ConvAutoencoder:
         
         model.summary()
 
+        return model
+    
+    def build_model2(self, hp):
+        input_shape = self.input_shape  # Adjust based on your dataset
+        input_ = keras.layers.Input(shape=input_shape)
+        # Encoder
+        x = keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu',strides=2)(input_)
+        x = keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu')(x)
+        x = keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu',strides=2)(x)
+        x = keras.layers.Conv2D(256, (3, 3), padding='same', activation='relu')(x)
+        x = keras.layers.Conv2D(256, (3, 3), padding='same', activation='relu',strides=2)(x)
+        x = keras.layers.Conv2D(512, (3, 3), padding='same', activation='relu')(x)
+        x = keras.layers.Conv2D(512, (3, 3), padding='same', activation='relu')(x)
+        encoder = keras.layers.Conv2D(256, (3, 3), padding='same', activation='relu')(x)
+
+        # Decoder
+        x = keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu')(encoder)
+        x = keras.layers.UpSampling2D((2, 2))(x)
+        x = keras.layers.Conv2D(64, (3, 3), padding='same', activation='relu')(x)
+        x = keras.layers.UpSampling2D((2, 2))(x)
+        x = keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu')(x)
+        x = keras.layers.Conv2D(16, (3, 3), padding='same', activation='relu')(x)
+        # Adjust the output layer for an RGB image (2 channels)
+        x = keras.layers.Conv2D(2, (3, 3), padding='same', activation=keras.layers.LeakyReLU(alpha=.5))(x)
+        decoder = keras.layers.UpSampling2D((2, 2))(x)
+        # Autoencoder model
+        model = keras.models.Model(inputs=input_, outputs=decoder)
+        
         return model
     
     def conv_block(self, input_tensor, num_filters, filter_size):
